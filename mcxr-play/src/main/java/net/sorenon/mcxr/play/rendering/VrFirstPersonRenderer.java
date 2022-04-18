@@ -209,7 +209,7 @@ public class VrFirstPersonRenderer {
             Vec3 gripPos = convert(pose.getPos());
             Vec3 camPos = context.camera().getPosition();
 
-            if (handIndex != MCXRPlayClient.getMainHand() && XrInput.vanillaGameplayActionSet.teleport.currentState) {
+            if (handIndex != MCXRPlayClient.getMainHand() && XrInput.vanillaGameplayActionSet.teleport.currentState && PlayOptions.teleportEnabled) {
                 matrices.pushPose();
 
                 matrices.translate(-camPos.x, -camPos.y, -camPos.z);

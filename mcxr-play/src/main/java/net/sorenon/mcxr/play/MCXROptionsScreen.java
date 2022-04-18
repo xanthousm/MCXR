@@ -117,25 +117,23 @@ public class MCXROptionsScreen extends Screen {
                 this.height / 6 + 54 + 24 + 12,
                 150,
                 20,
-                PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.enable_snap_turning") : new TranslatableComponent("mcxr.options.enable_smooth_turning"),
+                PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.smooth_turning") : new TranslatableComponent("mcxr.options.snap_turning"),
                 button -> {
                     PlayOptions.smoothTurning = !PlayOptions.smoothTurning;
                     PlayOptions.save();
-                    button.setMessage(PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.enable_snap_turning") : new TranslatableComponent("mcxr.options.enable_smooth_turning"));
+                    button.setMessage(PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.smooth_turning") : new TranslatableComponent("mcxr.options.snap_turning"));
                 }));
-
-
 
         this.addRenderableWidget(new Button(
                 this.width / 2 - 155 + 160,
-                this.height / 6 + 54 + 24 + 12,
+                this.height / 6 + 54 + 24 * 2 + 12,
                 150,
                 20,
-                PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.enable_snap_turning") : new TranslatableComponent("mcxr.options.enable_smooth_turning"),
+                PlayOptions.teleportEnabled ? new TranslatableComponent("mcxr.options.teleportEnabled") : new TranslatableComponent("mcxr.options.teleportDisabled"),
                 button -> {
-                    PlayOptions.smoothTurning = !PlayOptions.smoothTurning;
+                    PlayOptions.teleportEnabled = !PlayOptions.teleportEnabled;
                     PlayOptions.save();
-                    button.setMessage(PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.enable_snap_turning") : new TranslatableComponent("mcxr.options.enable_smooth_turning"));
+                    button.setMessage(PlayOptions.teleportEnabled ? new TranslatableComponent("mcxr.options.teleportEnabled") : new TranslatableComponent("mcxr.options.teleportDisabled"));
                 }));
 
 

@@ -151,7 +151,7 @@ public final class XrInput {
             }
         }
 
-        if (actionSet.teleport.changedSinceLastSync && !actionSet.teleport.currentState) {
+        if (PlayOptions.teleportEnabled && actionSet.teleport.changedSinceLastSync && !actionSet.teleport.currentState) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
                 int handIndex = 0;
@@ -260,7 +260,7 @@ public final class XrInput {
             if (!actionSet.quickmenu.currentState) {
                 Minecraft client = Minecraft.getInstance();
                 if (client.screen == null) {
-                    client.setScreen(new QuickMenu(new TranslatableComponent("QuickMenu")));
+                    client.setScreen(new QuickMenu("QuickMenu"));
                 }
             }
         }
@@ -282,6 +282,30 @@ public final class XrInput {
                 client.player.setShiftKeyDown(true);
             }
         }
+        /*
+        if (actionSet.sprintSneak.changedSinceLastSync) {
+            float value = actionSet.sprintSneak.currentState;
+            Minecraft client = Minecraft.getInstance();
+            if (actionSet.sprintSneakActivated) {
+                actionSet.sprintSneakActivated = Math.abs(value) > 0.15f;
+            } else {
+                if (value < -0.7f) {//sneak priority
+                    client.options.keyShift.setDown(true);
+                    if (client.player != null) {
+                        client.player.setShiftKeyDown(true);
+                    }
+                    actionSet.sprintSneakActivated = true;
+                } else if (value > 0.7f) {//sprint
+                    client.options.keySprint.setDown(true);
+                } else{ //released
+                    client.options.keySprint.setDown(false);
+                    if (client.player != null) {
+                        client.player.setSprinting(false);
+                    }
+                }
+            }
+        }*/
+
 //        if (actionSet.attackState.changedSinceLastSync()) {
 //            MinecraftClient client = MinecraftClient.getInstance();
 //            InputUtil.Key key = client.options.keyAttack.getDefaultKey();

@@ -4,7 +4,6 @@ import com.electronwill.nightconfig.core.file.FileConfig;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class PlayOptions {
-
     private static FileConfig fileConfig;
 
     public static boolean xrUninitialized = false;
@@ -17,7 +16,7 @@ public class PlayOptions {
     public static boolean smoothTurning = false;
     public static float snapTurnAmount = 22f;
     public static float smoothTurnRate = 120f;
-
+    public static boolean teleportEnabled=true;
     /**
      * The angle to rotate the player's in-game hand for a more comfortable experience
      * May be different for different controllers -> needs testing
@@ -44,6 +43,8 @@ public class PlayOptions {
         fileConfig.set("snapTurnAmount", snapTurnAmount);
         fileConfig.set("smoothTurnRate", smoothTurnRate);
 
+        fileConfig.set("teleportEnabled", teleportEnabled);
+
         fileConfig.set("SSAA", SSAA);
         fileConfig.save();
     }
@@ -62,6 +63,8 @@ public class PlayOptions {
         smoothTurning = fileConfig.getOrElse("smoothTurning", false);
         snapTurnAmount = fileConfig.<Number>getOrElse("snapTurnAmount", 22f).floatValue();
         smoothTurnRate = fileConfig.<Number>getOrElse("smoothTurnRate", 120f).floatValue();
+
+        teleportEnabled = fileConfig.getOrElse("teleportEnabled", true);
 
         SSAA = fileConfig.<Number>getOrElse("SSAA", 1).floatValue();
     }

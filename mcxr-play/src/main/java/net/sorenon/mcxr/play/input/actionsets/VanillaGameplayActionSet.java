@@ -36,10 +36,14 @@ public class VanillaGameplayActionSet extends ActionSet {
     public final BoolAction turnLeft = new BoolAction("turn_left");
     public final BoolAction turnRight = new BoolAction("turn_right");
 
+    //public final FloatAction sprintSneak = new FloatAction("sprintSneak");
+
     // public final MultiHapticAction haptics = new MultiHapticAction("haptics", new String[]{"/user/hand/left", "/user/hand/right"});
 
     public boolean turnActivated = false;
     public boolean hotbarActivated;
+
+    //public boolean sprintSneakActivated = false;
 
     public final List<Action> actions = List.of(
             jump,
@@ -48,6 +52,7 @@ public class VanillaGameplayActionSet extends ActionSet {
             use,
             sprint,
             sneak,
+            //sprintSneak,
             chat,
             menu,
             resetPos,
@@ -92,6 +97,7 @@ public class VanillaGameplayActionSet extends ActionSet {
                         new Pair<>(jump, "/user/hand/right/input/a/click"),
                         new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
                         new Pair<>(sneak, "/user/hand/right/input/thumbstick/y"),
+                        //new Pair<>(sprintSneak, "/user/hand/right/input/thumbstick/y"),
                         new Pair<>(resetPos, "/user/hand/right/input/thumbstick/click"),
                         new Pair<>(quickmenu, "/user/hand/right/input/b/click"),
                         new Pair<>(menu, "/user/hand/left/input/menu/click"),

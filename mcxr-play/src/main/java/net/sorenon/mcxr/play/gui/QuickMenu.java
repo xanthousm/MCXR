@@ -12,10 +12,10 @@ import net.sorenon.mcxr.play.compat.svc.SimpleVoiceChatCompat;
 
 import java.util.ArrayList;
 
-public class QuickMenu extends Screen {
+public class QuickMenu extends ChatScreen {
 
-    public QuickMenu(Component component) {
-        super(component);
+    public QuickMenu(String string) {
+        super(string);
     }
 
     private void renderMenuButtons(PoseStack stack) {
@@ -51,7 +51,7 @@ public class QuickMenu extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        renderMenuButtons(poseStack);
         super.render(poseStack, i, j, f);
+        renderMenuButtons(poseStack);
     }
 }
