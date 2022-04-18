@@ -370,12 +370,16 @@ public final class XrInput {
             if (actionSet.attack.currentState) {
                 mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
                         GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
+            } else {
+                mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
+                        GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
             }
         }
-        if(!actionSet.attack.currentState) {
+        //moved back to line above, was causing some weird item selecting behaviour in creative menu
+        /*if(!actionSet.attack.currentState) {
             mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
                     GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
-        }
+        }*/
         if (actionSet.inventory.currentState) {
             long heldTime = predictedDisplayTime - actionSet.inventory.lastChangeTime;
             if (heldTime * 1E-09 > 1) {

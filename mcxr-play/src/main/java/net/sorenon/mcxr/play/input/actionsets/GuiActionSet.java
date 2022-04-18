@@ -45,20 +45,32 @@ public class GuiActionSet extends ActionSet {
 
     @Override
     public void getDefaultBindings(HashMap<String, List<Pair<Action, String>>> map) {
+        if (MCXRPlayClient.OPEN_XR_STATE.instance.runtimeName.contains("Oculus")) {
+            map.computeIfAbsent("/interaction_profiles/oculus/touch_controller", aLong -> new ArrayList<>()).addAll(
+                    List.of(
+                            new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(split, "/user/hand/right/input/b/click"),
+                            new Pair<>(quickMove, "/user/hand/left/input/x/click"),
+                            new Pair<>(exit, "/user/hand/left/input/y/click"),
+                            new Pair<>(resetGUI, "/user/hand/left/input/menu/click"),
+                            new Pair<>(scroll, "/user/hand/right/input/thumbstick")
+                    )
+            );
+        }
+        else {
 
-        map.computeIfAbsent("/interaction_profiles/oculus/touch_controller", aLong -> new ArrayList<>()).addAll(
-                List.of(
-                        new Pair<>(pickup, "/user/hand/right/input/a/click"),
-                        new Pair<>(split, "/user/hand/right/input/b/click"),
-                        new Pair<>(quickMove, "/user/hand/left/input/x/click"),
-                        new Pair<>(exit, "/user/hand/left/input/y/click"),
-                        new Pair<>(resetGUI, "/user/hand/left/input/menu/click"),
-                        new Pair<>(scroll, "/user/hand/right/input/thumbstick"),
-                        new Pair<>(scroll, "/user/hand/right/input/thumbstick")
-                )
-        );
-
-        if (!MCXRPlayClient.OPEN_XR_STATE.instance.runtimeName.contains("Oculus")) {
+            //oculus on steamvr doesn't have left/input/menu/click (is used for steamvr menu by default)
+            map.computeIfAbsent("/interaction_profiles/oculus/touch_controller", aLong -> new ArrayList<>()).addAll(
+                    List.of(
+                            new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(split, "/user/hand/right/input/b/click"),
+                            new Pair<>(quickMove, "/user/hand/left/input/x/click"),
+                            new Pair<>(exit, "/user/hand/left/input/y/click"),
+                            new Pair<>(resetGUI, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(resetGUI, "/user/hand/right/input/thumbstick/click"),
+                            new Pair<>(scroll, "/user/hand/right/input/thumbstick")
+                    )
+            );
 
             map.computeIfAbsent("/interaction_profiles/valve/index_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
@@ -66,7 +78,8 @@ public class GuiActionSet extends ActionSet {
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/a/click"),
                             new Pair<>(exit, "/user/hand/left/input/b/click"),
-                            new Pair<>(resetGUI, "/user/hand/left/input/menu/click"),
+                            new Pair<>(resetGUI, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(resetGUI, "/user/hand/right/input/thumbstick/click"),
                             new Pair<>(scroll, "/user/hand/right/input/thumbstick")
                     )
             );
