@@ -14,8 +14,10 @@ public class PlayOptions {
     public static MoveDirectionPose flyDirection = MoveDirectionPose.RightHand;
 
     public static boolean smoothTurning = false;
-    public static float snapTurnAmount = 22f;
+    public static float snapTurnAmount = 30f;
     public static float smoothTurnRate = 120f;
+    public static boolean continuousSnapTurning = true;
+    public static float SnapTurnDelay = 0.25f;
     public static boolean teleportEnabled=true;
     /**
      * The angle to rotate the player's in-game hand for a more comfortable experience

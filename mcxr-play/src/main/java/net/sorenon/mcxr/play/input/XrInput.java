@@ -54,6 +54,7 @@ public final class XrInput {
     public static final GuiActionSet guiActionSet = new GuiActionSet();
 
     private static long lastPollTime = 0;
+    private static long turnTime = 0;
 
 
     private XrInput() {
@@ -185,6 +186,22 @@ public final class XrInput {
                 Vector3f wantedPos = new Vector3f(MCXRPlayClient.viewSpacePoses.getPhysicalPose().getPos());
 
                 MCXRPlayClient.stagePosition = wantedPos.sub(newPos).mul(1, 0, 1);
+            }
+        } else if (PlayOptions.continuousSnapTurning) {
+            if (Math.abs(actionSet.turn.currentState) > 0.4) {
+                float delta = (time - turnTime) / 1_000_000_000f;
+                if(delta>PlayOptions.SnapTurnDelay) {
+                    turnTime = time;
+
+                    MCXRPlayClient.stageTurn += Math.toRadians(PlayOptions.snapTurnAmount) * -Math.signum(actionSet.turn.currentState);
+                    Vector3f newPos = new Quaternionf().rotateLocalY(MCXRPlayClient.stageTurn).transform(MCXRPlayClient.viewSpacePoses.getStagePose().getPos(), new Vector3f());
+                    Vector3f wantedPos = new Vector3f(MCXRPlayClient.viewSpacePoses.getPhysicalPose().getPos());
+
+                    MCXRPlayClient.stagePosition = wantedPos.sub(newPos).mul(1, 0, 1);
+                }
+            }
+            else{
+                turnTime=0;
             }
         } else {
             if (actionSet.turn.changedSinceLastSync) {
