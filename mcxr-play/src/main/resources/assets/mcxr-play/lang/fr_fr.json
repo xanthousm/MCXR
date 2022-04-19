@@ -19,6 +19,9 @@
   "mcxr.action.sprint": "Courir",
   "mcxr.action.reset_pos": "Réinitialiser la position",
 
+  "mcxr.action.sneakAnalog": "S'accroupir Analog",
+  "mcxr.action.sprintAnalog": "Courir Analog",
+
   "mcxr.actionset.gui": "Menu",
   "mcxr.action.close": "Fermer",
   "mcxr.action.pickup": "Ramasser / Lacher",

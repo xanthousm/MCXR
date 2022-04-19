@@ -60,6 +60,14 @@ public class HandsActionSet extends ActionSet {
                             new Pair<>(aim, "/user/hand/right/input/aim/pose")
                     )
             );
+            map.computeIfAbsent("/interaction_profiles/htc/vive_controller", aLong -> new ArrayList<>()).addAll(
+                    List.of(
+                            new Pair<>(grip, "/user/hand/left/input/grip/pose"),
+                            new Pair<>(grip, "/user/hand/right/input/grip/pose"),
+                            new Pair<>(aim, "/user/hand/left/input/aim/pose"),
+                            new Pair<>(aim, "/user/hand/right/input/aim/pose")
+                    )
+            );
         }
 
 

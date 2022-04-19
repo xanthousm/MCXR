@@ -275,6 +275,29 @@ public final class XrInput {
                 }
             }
         }
+        if (actionSet.sprintAnalog.changedSinceLastSync) {
+            float value = actionSet.sprintAnalog.currentState;
+            Minecraft client = Minecraft.getInstance();
+            if (value > 0.8f && !actionSet.sprintAnalogOn) {//sprint
+                actionSet.sprintAnalogOn=true;
+                client.options.keySprint.setDown(true);
+                //disable sneak
+                if (actionSet.sneakAnalogOn){
+                    actionSet.sneakAnalogOn=false;
+                    client.options.keyShift.setDown(false);
+                    if (client.player != null) {
+                        client.player.setShiftKeyDown(true);
+                    }
+                }
+            } else if (actionSet.sprintAnalogOn && value < 0.6f){
+                actionSet.sprintAnalogOn=false;
+                client.options.keySprint.setDown(false);
+                if (client.player != null) {
+                    client.player.setSprinting(false);
+                }
+            }
+        }
+
         if (actionSet.sneak.changedSinceLastSync) {
             Minecraft client = Minecraft.getInstance();
             client.options.keyShift.setDown(actionSet.sneak.currentState);
@@ -282,29 +305,32 @@ public final class XrInput {
                 client.player.setShiftKeyDown(true);
             }
         }
-        /*
-        if (actionSet.sprintSneak.changedSinceLastSync) {
-            float value = actionSet.sprintSneak.currentState;
+        if (actionSet.sneakAnalog.changedSinceLastSync) {
+            float value = actionSet.sneakAnalog.currentState;
             Minecraft client = Minecraft.getInstance();
-            if (actionSet.sprintSneakActivated) {
-                actionSet.sprintSneakActivated = Math.abs(value) > 0.15f;
-            } else {
-                if (value < -0.7f) {//sneak priority
-                    client.options.keyShift.setDown(true);
-                    if (client.player != null) {
-                        client.player.setShiftKeyDown(true);
-                    }
-                    actionSet.sprintSneakActivated = true;
-                } else if (value > 0.7f) {//sprint
-                    client.options.keySprint.setDown(true);
-                } else{ //released
+            if (value < -0.8f && !actionSet.sneakAnalogOn) {//sneak activate
+                actionSet.sneakAnalogOn=true;
+                client.options.keyShift.setDown(true);
+                if (client.player != null) {
+                    client.player.setShiftKeyDown(true);
+                }
+                //disable sprint
+                if (actionSet.sprintAnalogOn){
+                    actionSet.sprintAnalogOn=false;
                     client.options.keySprint.setDown(false);
                     if (client.player != null) {
                         client.player.setSprinting(false);
                     }
                 }
+
+            } else if (actionSet.sneakAnalogOn && value > -0.6f){
+                actionSet.sneakAnalogOn=false;
+                client.options.keyShift.setDown(false);
+                if (client.player != null) {
+                    client.player.setShiftKeyDown(true);
+                }
             }
-        }*/
+        }
 
 //        if (actionSet.attackState.changedSinceLastSync()) {
 //            MinecraftClient client = MinecraftClient.getInstance();

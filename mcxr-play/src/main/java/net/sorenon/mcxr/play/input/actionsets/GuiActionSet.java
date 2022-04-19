@@ -97,6 +97,19 @@ public class GuiActionSet extends ActionSet {
                             new Pair<>(scroll, "/user/hand/right/input/thumbstick")
                     )
             );
+            map.computeIfAbsent("/interaction_profiles/htc/vive_controller", aLong -> new ArrayList<>()).addAll(
+                    List.of(
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
+                            new Pair<>(split, "/user/hand/right/input/trackpad/click"),
+                            new Pair<>(quickMove, "/user/hand/left/input/trigger/value"),
+                            new Pair<>(exit, "/user/hand/left/input/trackpad/click"),
+                            //new Pair<>(resetGUI, "/user/hand/left/input/thumbstick/click"),
+                            //new Pair<>(resetGUI, "/user/hand/right/input/thumbstick/click"),
+                            //new Pair<>(exit, "/user/hand/left/input/menu/click"),
+                            //new Pair<>(exit, "/user/hand/right/input/menu/click"),
+                            new Pair<>(scroll, "/user/hand/right/input/trackpad")
+                    )
+            );
 
         }
 

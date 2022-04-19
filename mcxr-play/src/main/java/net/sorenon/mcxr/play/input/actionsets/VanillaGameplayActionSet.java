@@ -36,14 +36,16 @@ public class VanillaGameplayActionSet extends ActionSet {
     public final BoolAction turnLeft = new BoolAction("turn_left");
     public final BoolAction turnRight = new BoolAction("turn_right");
 
-    //public final FloatAction sprintSneak = new FloatAction("sprintSneak");
+    public final FloatAction sneakAnalog = new FloatAction("sneak_analog");
+    public final FloatAction sprintAnalog = new FloatAction("sprint_analog");
 
     // public final MultiHapticAction haptics = new MultiHapticAction("haptics", new String[]{"/user/hand/left", "/user/hand/right"});
 
     public boolean turnActivated = false;
     public boolean hotbarActivated;
 
-    //public boolean sprintSneakActivated = false;
+    public boolean sneakAnalogOn = false;
+    public boolean sprintAnalogOn = false;
 
     public final List<Action> actions = List.of(
             jump,
@@ -52,7 +54,6 @@ public class VanillaGameplayActionSet extends ActionSet {
             use,
             sprint,
             sneak,
-            //sprintSneak,
             chat,
             menu,
             resetPos,
@@ -65,6 +66,8 @@ public class VanillaGameplayActionSet extends ActionSet {
             hotbarRight,
             turnLeft,
             turnRight,
+            sneakAnalog,
+            sprintAnalog,
             teleport
     );
 
@@ -95,15 +98,16 @@ public class VanillaGameplayActionSet extends ActionSet {
                         new Pair<>(turn, "/user/hand/right/input/thumbstick/x"),
                         new Pair<>(inventory, "/user/hand/left/input/y/click"),
                         new Pair<>(jump, "/user/hand/right/input/a/click"),
-                        new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
-                        new Pair<>(sneak, "/user/hand/right/input/thumbstick/y"),
-                        //new Pair<>(sprintSneak, "/user/hand/right/input/thumbstick/y"),
-                        new Pair<>(resetPos, "/user/hand/right/input/thumbstick/click"),
+                        //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
+                        //new Pair<>(sneak, "/user/hand/right/input/thumbstick/y"),
+                        new Pair<>(resetPos, "/user/hand/left/input/thumbstick/click"),
                         new Pair<>(quickmenu, "/user/hand/right/input/b/click"),
-                        new Pair<>(menu, "/user/hand/left/input/menu/click"),
-                        new Pair<>(chat, "/user/hand/left/input/x/click"),
+                        new Pair<>(menu, "/user/hand/left/input/menu/click"),//does nothing on steamvr default
+                        //new Pair<>(chat, "/user/hand/left/input/x/click"),
                         //new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
-                        new Pair<>(stand, "/user/hand/right/input/thumbstick/click"),
+                        new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
+                        new Pair<>(sneakAnalog, "/user/hand/right/input/thumbstick/y"),
+                        new Pair<>(sprintAnalog, "/user/hand/right/input/thumbstick/y"),
                         new Pair<>(teleport, "/user/hand/left/input/x/click"
                         )
                 ));
@@ -121,10 +125,12 @@ public class VanillaGameplayActionSet extends ActionSet {
                             new Pair<>(turn, "/user/hand/right/input/thumbstick/x"),
                             new Pair<>(inventory, "/user/hand/left/input/trackpad/force"),
                             new Pair<>(jump, "/user/hand/right/input/a/click"),
-                            new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
-                            new Pair<>(sneak, "/user/hand/right/input/thumbstick/click"),
-                            //new Pair<>(stand, "/user/hand/right/input/thumbstick/click"),
-                            new Pair<>(resetPos, "/user/hand/right/input/thumbstick/click"),
+                            //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
+                            //new Pair<>(sneak, "/user/hand/right/input/thumbstick/click"),
+                            new Pair<>(sneakAnalog, "/user/hand/right/input/thumbstick/y"),
+                            new Pair<>(sprintAnalog, "/user/hand/right/input/thumbstick/y"),
+                            new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(resetPos, "/user/hand/left/input/thumbstick/click"),
                             new Pair<>(quickmenu, "/user/hand/right/input/b/click"),
                             //don't have access to index menu button
                             //new Pair<>(menu, "/user/hand/left/input/menu/click"),
@@ -145,18 +151,44 @@ public class VanillaGameplayActionSet extends ActionSet {
                             new Pair<>(turn, "/user/hand/right/input/thumbstick/x"),
                             new Pair<>(inventory, "/user/hand/left/input/trackpad/click"),
                             new Pair<>(jump, "/user/hand/right/input/trackpad/click"),
-                            new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
-                            new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
-                            new Pair<>(stand, "/user/hand/right/input/thumbstick"),
-                            new Pair<>(resetPos, "/user/hand/right/input/thumbstick/click"),
+                            //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
+                            //new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
+                            new Pair<>(sneakAnalog, "/user/hand/right/input/thumbstick/y"),
+                            new Pair<>(sprintAnalog, "/user/hand/right/input/thumbstick/y"),
+                            //new Pair<>(stand, "/user/hand/right/input/thumbstick"),
+                            new Pair<>(resetPos, "/user/hand/left/input/thumbstick/click"),
                             new Pair<>(quickmenu, "/user/hand/right/input/menu/click"),
-                            new Pair<>(menu, "/user/hand/left/input/menu/click"),
-                            new Pair<>(chat, "/user/hand/left/input/menu/click"),
+                            //new Pair<>(menu, "/user/hand/left/input/menu/click"),
+                            //new Pair<>(chat, "/user/hand/left/input/menu/click"),
                             new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
                             new Pair<>(teleport, "/user/hand/left/input/menu/click")
                     )
             );
 
+            map.computeIfAbsent("/interaction_profiles/htc/vive_controller", aLong -> new ArrayList<>()).addAll(
+                    List.of(
+                            new Pair<>(use, "/user/hand/left/input/trigger/value"),
+                            new Pair<>(attack, "/user/hand/right/input/trigger/value"),
+                            new Pair<>(move, "/user/hand/left/input/trackpad"),
+                            new Pair<>(hotbarRight, "/user/hand/right/input/squeeze/click"),
+                            new Pair<>(hotbarLeft, "/user/hand/left/input/squeeze/click"),
+                            new Pair<>(turn, "/user/hand/right/input/trackpad/x"),
+                            new Pair<>(inventory, "/user/hand/left/input/trackpad/click"),
+                            new Pair<>(jump, "/user/hand/right/input/trackpad/click"),
+                            //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
+                            //new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
+                            new Pair<>(sneakAnalog, "/user/hand/right/input/trackpad/y"),
+                            new Pair<>(sprintAnalog, "/user/hand/right/input/trackpad/y"),
+                            //new Pair<>(stand, "/user/hand/right/input/thumbstick"),
+                            //new Pair<>(resetPos, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(quickmenu, "/user/hand/right/input/menu/click"),
+                            //new Pair<>(menu, "/user/hand/left/input/menu/click"),
+                            //new Pair<>(chat, "/user/hand/left/input/menu/click"),
+                            //new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(teleport, "/user/hand/left/input/menu/click")
+                            //out of buttons to enable stand and reset_pos
+                    )
+            );
 
         }
 
@@ -171,13 +203,15 @@ public class VanillaGameplayActionSet extends ActionSet {
                         new Pair<>(turn, "/user/hand/right/input/thumbstick/x"),
                         new Pair<>(inventory, "/user/hand/left/input/y/click"),
                         new Pair<>(jump, "/user/hand/right/input/a/click"),
-                        new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
-                        new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
-                        new Pair<>(stand, "/user/hand/right/input/thumbstick"),
-                        new Pair<>(resetPos, "/user/hand/right/input/thumbstick/click"),
+                        //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
+                        //new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
+                        new Pair<>(sneakAnalog, "/user/hand/right/input/thumbstick/y"),
+                        new Pair<>(sprintAnalog, "/user/hand/right/input/thumbstick/y"),
+                        //new Pair<>(stand, "/user/hand/right/input/thumbstick"),
+                        new Pair<>(resetPos, "/user/hand/left/input/thumbstick/click"),
                         new Pair<>(quickmenu, "/user/hand/right/input/b/click"),
                         new Pair<>(menu, "/user/hand/left/input/menu/click"),
-                        new Pair<>(chat, "/user/hand/left/input/x/click"),
+                        //new Pair<>(chat, "/user/hand/left/input/x/click"),
                         new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
                         new Pair<>(teleport, "/user/hand/left/input/x/click")
                     )
@@ -195,13 +229,15 @@ public class VanillaGameplayActionSet extends ActionSet {
                         new Pair<>(turn, "/user/hand/right/input/thumbstick/x"),
                         new Pair<>(inventory, "/user/hand/left/input/y/click"),
                         new Pair<>(jump, "/user/hand/right/input/a/click"),
-                        new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
-                        new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
-                        new Pair<>(stand, "/user/hand/right/input/thumbstick"),
-                        new Pair<>(resetPos, "/user/hand/right/input/thumbstick/click"),
+                        //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
+                        //new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
+                        new Pair<>(sneakAnalog, "/user/hand/right/input/thumbstick/y"),
+                        new Pair<>(sprintAnalog, "/user/hand/right/input/thumbstick/y"),
+                        //new Pair<>(stand, "/user/hand/right/input/thumbstick"),
+                        new Pair<>(resetPos, "/user/hand/left/input/thumbstick/click"),
                         new Pair<>(quickmenu, "/user/hand/right/input/b/click"),
                         new Pair<>(menu, "/user/hand/left/input/menu/click"),
-                        new Pair<>(chat, "/user/hand/left/input/x/click"),
+                        //new Pair<>(chat, "/user/hand/left/input/x/click"),
                         new Pair<>(stand, "/user/hand/left/input/thumbstick/click"),
                         new Pair<>(teleport, "/user/hand/left/input/x/click")
                     )

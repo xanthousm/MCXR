@@ -35,6 +35,9 @@
   "mcxr.action.sprint": "Sprint",
   "mcxr.action.reset_pos": "Reset Pos",
 
+  "mcxr.action.sneakAnalog": "Sneak Analog",
+  "mcxr.action.sprintAnalog": "Sprint Analog",
+
   "mcxr.actionset.gui": "GUI",
   "mcxr.action.close": "Close",
   "mcxr.action.pickup": "Pickup / Drop",
