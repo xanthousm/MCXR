@@ -1,3 +1,57 @@
+This fork of MCXR contains tweaks to the mod that I just couldn't wait for - so I did them myself. I am testing my builds on a Quest 2 using virtual desktop to link to Windows 10, so the controller mappings for other VR device controllers might need improvement. The current controller mappings are as follows:
+## *Control Mappings*
+## Oculus/Vive Cosmos/HP Reverb G2
+|Action|Left|Right|
+|---|---|---|
+|…/input/a/click||jump|
+|…/input/b/click||quick menu/chat|
+|…/input/x/click|teleport||
+|…/input/y/click|inventory/menu(hold)||
+|…/input/menu/click|menu||
+|…/input/squeeze/value|hotbar|hotbar|
+|…/input/trigger/value|use|attack|
+|…/input/thumbstick/x|move|turn|
+|…/input/thumbstick/y|move|sprint/sneak|
+|…/input/thumbstick/click|reset pos+change height||
+
+## Index
+|Action|Left|Right|
+|---|---|---|
+|…/input/a/click||jump|
+|…/input/b/click|inventory/menu(hold)||
+|…/input/squeeze/value|hotbar|hotbar|
+|…/input/trigger/value|use|attack|
+|…/input/thumbstick/x|move|turn|
+|…/input/thumbstick/y|move|sprint/sneak|
+|…/input/thumbstick/click|reset pos+change height||
+|…/input/trackpad/x|||
+|…/input/trackpad/y|||
+|…/input/trackpad/force|teleport|quickmenu/chat|
+
+## Vive Wands
+|Action|Left|Right|
+|---|---|---|
+|…/input/squeeze/click|hotbar|hotbar|
+|…/input/menu/click|teleport|quickmenu/chat|
+|…/input/trigger/value|use|attack|
+|…/input/trackpad/x|move|turn|
+|…/input/trackpad/y|move|sprint/sneak|
+|…/input/trackpad/click|inventory/menu(hold)|jump|
+
+## WMR
+|Action|Left|Right|
+|---|---|---|
+|…/input/menu/click|teleport|quickmenu/chat|
+|…/input/squeeze/click|hotbar|hotbar|
+|…/input/trigger/value|use|attack|
+|…/input/thumbstick/x|move|turn|
+|…/input/thumbstick/y|move|sprint/sneak|
+|…/input/thumbstick/click|reset pos+change height||
+|…/input/trackpad/x|||
+|…/input/trackpad/y|||
+|…/input/trackpad/click|inventory/menu(hold)|jump|
+
+Original description:
 [![#MinecraftXR](https://user-images.githubusercontent.com/51373236/114272119-ad237800-9a0c-11eb-8786-6275555a594b.png)](#)
 
 A VR mod for Minecraft using OpenXR and fabric.
