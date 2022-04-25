@@ -349,6 +349,16 @@ public final class XrInput {
             }
         }
 
+        if (actionSet.swapHands.changedSinceLastSync) {
+            Minecraft client = Minecraft.getInstance();
+            InputConstants.Key key = client.options.keySwapOffhand.getDefaultKey();
+            if (actionSet.swapHands.currentState) {
+                KeyMapping.click(key);
+                KeyMapping.set(key, true);
+            } else {
+                KeyMapping.set(key, false);
+            }
+        }
 //        if (actionSet.attackState.changedSinceLastSync()) {
 //            MinecraftClient client = MinecraftClient.getInstance();
 //            InputUtil.Key key = client.options.keyAttack.getDefaultKey();

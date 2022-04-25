@@ -21,6 +21,7 @@
 
   "mcxr.action.sneakAnalog": "S'accroupir Analog",
   "mcxr.action.sprintAnalog": "Courir Analog",
+  "mcxr.action.swapHands": "Swap Hands",
 
   "mcxr.actionset.gui": "Menu",
   "mcxr.action.close": "Fermer",
