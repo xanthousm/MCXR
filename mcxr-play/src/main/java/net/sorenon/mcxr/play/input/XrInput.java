@@ -8,8 +8,12 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.sorenon.mcxr.core.JOMLUtil;
@@ -43,6 +47,11 @@ import oshi.util.tuples.Pair;
 
 import java.util.HashMap;
 import java.util.List;
+
+import net.minecraft.sounds.SoundEvents;
+//import net.minecraft.client.MinecraftClient;
+//import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.sounds.SoundEngineExecutor;
 
 import static org.lwjgl.system.MemoryStack.stackPointers;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -198,6 +207,11 @@ public final class XrInput {
                     Vector3f wantedPos = new Vector3f(MCXRPlayClient.viewSpacePoses.getPhysicalPose().getPos());
 
                     MCXRPlayClient.stagePosition = wantedPos.sub(newPos).mul(1, 0, 1);
+
+                    //Player player = Minecraft.getInstance().player;
+                    //player.getLevel().playSound(player, player.eyeBlockPosition(), SoundEvents.AXOLOTL_ATTACK, SoundSource.BLOCKS, 1f, 1f);
+
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AXE_SCRAPE,1f,1f));
                 }
             }
             else{
@@ -216,6 +230,11 @@ public final class XrInput {
                     MCXRPlayClient.stagePosition = wantedPos.sub(newPos).mul(1, 0, 1);
 
                     actionSet.turnActivated = true;
+
+                    //Player player = Minecraft.getInstance().player;
+                    //player.getLevel().playSound(player, player.eyeBlockPosition(), SoundEvents.AXOLOTL_ATTACK, SoundSource.BLOCKS, 1f, 1f);
+
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AXE_SCRAPE,1f,1f));
                 }
             }
         }
