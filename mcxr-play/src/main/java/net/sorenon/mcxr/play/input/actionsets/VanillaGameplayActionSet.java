@@ -208,6 +208,7 @@ public class VanillaGameplayActionSet extends ActionSet {
                         new Pair<>(turn, "/user/hand/right/input/thumbstick/x"),
                         new Pair<>(inventory, "/user/hand/left/input/y/click"),
                         new Pair<>(jump, "/user/hand/right/input/a/click"),
+
                         //new Pair<>(sprint, "/user/hand/left/input/thumbstick/click"),
                         //new Pair<>(sneak, "/user/hand/right/input/thumbstick"),
                         new Pair<>(sneakAnalog, "/user/hand/right/input/thumbstick/y"),

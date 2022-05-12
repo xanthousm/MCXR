@@ -82,8 +82,7 @@ public class QuickChat extends ChatScreen {
             this.addRenderableWidget(
                     new Button(buttonX, buttonY, buttonWidth, buttonHeight, new TranslatableComponent(word), (button -> {
                         this.sendMessage(word);
-                        //give me chat history!
-                        //Minecraft.getInstance().gui.getChat().clearMessages(true);
+//                        Minecraft.getInstance().gui.getChat().clearMessages(true);
                     }))
             );
 
