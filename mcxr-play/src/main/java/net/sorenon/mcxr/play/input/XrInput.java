@@ -209,10 +209,9 @@ public final class XrInput {
 
                     MCXRPlayClient.stagePosition = wantedPos.sub(newPos).mul(1, 0, 1);
 
-                    //Player player = Minecraft.getInstance().player;
-                    //player.getLevel().playSound(player, player.eyeBlockPosition(), SoundEvents.AXOLOTL_ATTACK, SoundSource.BLOCKS, 1f, 1f);
-
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AXE_SCRAPE,1f,1f));
+                    if (PlayOptions.snapTurnSound) {
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.WOOL_STEP, 0.5f, 0.5f));
+                    }
                 }
             }
             else{
@@ -232,10 +231,9 @@ public final class XrInput {
 
                     actionSet.turnActivated = true;
 
-                    //Player player = Minecraft.getInstance().player;
-                    //player.getLevel().playSound(player, player.eyeBlockPosition(), SoundEvents.AXOLOTL_ATTACK, SoundSource.BLOCKS, 1f, 1f);
-
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AXE_SCRAPE,1f,1f));
+                    if (PlayOptions.snapTurnSound) {
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.WOOL_STEP, 0.5f, 0.5f));
+                    }
                 }
             }
         }
@@ -473,16 +471,11 @@ public final class XrInput {
                 mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
                         GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
             }
-        }
-        //moved back to line above, was causing some weird item selecting behaviour in creative menu
-        /*if(!actionSet.attack.currentState) {
-            mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
-                    GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
-        }*/
-        if (actionSet.inventory.currentState) {
-            long heldTime = predictedDisplayTime - actionSet.inventory.lastChangeTime;
-            if (heldTime * 1E-09 > 1) {
-                Minecraft.getInstance().pauseGame(false);
+            if (actionSet.inventory.currentState) {
+                long heldTime = predictedDisplayTime - actionSet.inventory.lastChangeTime;
+                if (heldTime * 1E-09 > 1) {
+                    Minecraft.getInstance().pauseGame(false);
+                }
             }
         }
     }

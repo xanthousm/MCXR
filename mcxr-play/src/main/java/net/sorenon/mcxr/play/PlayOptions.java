@@ -17,6 +17,7 @@ public class PlayOptions {
     public static float snapTurnAmount = 30f;
     public static float smoothTurnRate = 120f;
     public static boolean continuousSnapTurning = true;
+    public static boolean snapTurnSound = true;
     public static float SnapTurnDelay = 0.25f;
     public static boolean teleportEnabled=true;
     /**
