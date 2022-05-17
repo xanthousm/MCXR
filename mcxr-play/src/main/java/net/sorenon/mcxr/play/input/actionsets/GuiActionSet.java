@@ -59,14 +59,12 @@ public class GuiActionSet extends ActionSet {
         }
         else {
 
-            //oculus on steamvr doesn't have left/input/menu/click (is used for steamvr menu by default)
             map.computeIfAbsent("/interaction_profiles/oculus/touch_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
                             new Pair<>(pickup, "/user/hand/right/input/a/click"),
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),
-                            //new Pair<>(resetGUI, "/user/hand/left/input/menu/click"),
                             new Pair<>(resetGUI, "/user/hand/left/input/thumbstick/click"),
                             new Pair<>(resetGUI, "/user/hand/right/input/thumbstick/click"),
                             new Pair<>(scroll, "/user/hand/right/input/thumbstick")
@@ -123,7 +121,8 @@ public class GuiActionSet extends ActionSet {
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),
-                            new Pair<>(resetGUI, "/user/hand/left/input/menu/click"),
+                            new Pair<>(resetGUI, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(resetGUI, "/user/hand/right/input/thumbstick/click"),
                             new Pair<>(scroll, "/user/hand/right/input/thumbstick")
                     )
             );
@@ -135,7 +134,8 @@ public class GuiActionSet extends ActionSet {
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),
-                            new Pair<>(resetGUI, "/user/hand/left/input/menu/click"),
+                            new Pair<>(resetGUI, "/user/hand/left/input/thumbstick/click"),
+                            new Pair<>(resetGUI, "/user/hand/right/input/thumbstick/click"),
                             new Pair<>(scroll, "/user/hand/right/input/thumbstick")
                     )
             );
