@@ -10,6 +10,7 @@
   "mcxr.move_direction.head" : "Head",
   "mcxr.move_direction.right_hand" : "Right Hand",
   "mcxr.move_direction.left_hand" : "Left Hand",
+
   "mcxr.options.smooth_turning": "Camera Turning: Smooth",
   "mcxr.options.snap_turning": "Camera Turning: Snap",
   "mcxr.options.teleportEnabled": "Teleporting: Enabled",
