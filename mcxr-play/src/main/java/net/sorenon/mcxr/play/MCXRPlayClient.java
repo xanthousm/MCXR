@@ -127,16 +127,17 @@ public class MCXRPlayClient implements ClientModInitializer {
                             matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(90.0F));
                         }
 
+                        //cursor render part 2 (underwater) - also in VrFirstPersonRenderer.java
                         matrices.scale(0.5f, 1, 0.5f);
                         RenderType cursorLayer = RenderType.entityCutoutNoCull(GUI_ICONS_LOCATION);
                         VertexConsumer vertexConsumer = context.consumers().getBuffer(cursorLayer);
 
                         PoseStack.Pose entry = matrices.last();
 
-                        vertexConsumer.vertex(entry.pose(), -0.5f + (0.5f / 16f), 0.005f, -0.5f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
-                        vertexConsumer.vertex(entry.pose(), -0.5f + (0.5f / 16f), 0.005f, 0.5f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
-                        vertexConsumer.vertex(entry.pose(), 0.5f + (0.5f / 16f), 0.005f, 0.5f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0.0625f, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
-                        vertexConsumer.vertex(entry.pose(), 0.5f + (0.5f / 16f), 0.005f, -0.5f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0.0625f, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                        vertexConsumer.vertex(entry.pose(), -0.3f + (0.5f / 16f), 0.005f, -0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                        vertexConsumer.vertex(entry.pose(), -0.3f + (0.5f / 16f), 0.005f, 0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                        vertexConsumer.vertex(entry.pose(), 0.3f + (0.5f / 16f), 0.005f, 0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0.0625f, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                        vertexConsumer.vertex(entry.pose(), 0.3f + (0.5f / 16f), 0.005f, -0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0.0625f, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
 
                         matrices.popPose();
                     }

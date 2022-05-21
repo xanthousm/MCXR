@@ -49,6 +49,7 @@ public class GuiActionSet extends ActionSet {
             map.computeIfAbsent("/interaction_profiles/oculus/touch_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
                             new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),
@@ -62,6 +63,7 @@ public class GuiActionSet extends ActionSet {
             map.computeIfAbsent("/interaction_profiles/oculus/touch_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
                             new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),
@@ -74,6 +76,7 @@ public class GuiActionSet extends ActionSet {
             map.computeIfAbsent("/interaction_profiles/valve/index_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
                             new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/a/click"),
                             new Pair<>(exit, "/user/hand/left/input/b/click"),
@@ -85,6 +88,7 @@ public class GuiActionSet extends ActionSet {
 
             map.computeIfAbsent("/interaction_profiles/microsoft/motion_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/trackpad/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/trigger/value"),
@@ -98,6 +102,7 @@ public class GuiActionSet extends ActionSet {
             );
             map.computeIfAbsent("/interaction_profiles/htc/vive_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/trackpad/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/trigger/value"),
@@ -118,6 +123,7 @@ public class GuiActionSet extends ActionSet {
             map.computeIfAbsent("/interaction_profiles/hp/mixed_reality_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
                             new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),
@@ -131,6 +137,7 @@ public class GuiActionSet extends ActionSet {
             map.computeIfAbsent("/interaction_profiles/htc/vive_cosmos_controller", aLong -> new ArrayList<>()).addAll(
                     List.of(
                             new Pair<>(pickup, "/user/hand/right/input/a/click"),
+                            new Pair<>(pickup, "/user/hand/right/input/trigger/value"),
                             new Pair<>(split, "/user/hand/right/input/b/click"),
                             new Pair<>(quickMove, "/user/hand/left/input/x/click"),
                             new Pair<>(exit, "/user/hand/left/input/y/click"),

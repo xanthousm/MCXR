@@ -336,6 +336,14 @@ public class MCXRGameRenderer {
                 MCXRPlayClient.xrOrigin.y += MCXRPlayClient.heightAdjust;
             }
 
+            //sneaking, swimming offsets
+            if (camEntity.isShiftKeyDown()) {
+                MCXRPlayClient.xrOrigin.y *= 0.65;
+            }
+            if(camEntity.isSwimming()){
+                MCXRPlayClient.xrOrigin.y *= 0.15;
+            }
+
             MCXRPlayClient.viewSpacePoses.updateGamePose(MCXRPlayClient.xrOrigin);
             for (var poses : XrInput.handsActionSet.gripPoses) {
                 poses.updateGamePose(MCXRPlayClient.xrOrigin);
