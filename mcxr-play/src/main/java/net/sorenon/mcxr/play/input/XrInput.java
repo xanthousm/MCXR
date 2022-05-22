@@ -15,6 +15,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.sorenon.mcxr.core.JOMLUtil;
 import net.sorenon.mcxr.core.MCXRCore;
 import net.sorenon.mcxr.core.Pose;
@@ -52,6 +55,7 @@ import net.minecraft.sounds.SoundEvents;
 //import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sounds.SoundEngineExecutor;
 
+import static net.sorenon.mcxr.core.JOMLUtil.convert;
 import static org.lwjgl.system.MemoryStack.stackPointers;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -63,8 +67,10 @@ public final class XrInput {
 
     private static long lastPollTime = 0;
     private static long turnTime = 0;
+    private static Vec3 gripPosOld = new Vec3(0,0,0);
 
-
+    private static int motionPoints = 0;
+    private static HitResult lastHit = null;
 
     private XrInput() {
     }
@@ -184,6 +190,19 @@ public final class XrInput {
                     player.setPos(pos);
                 }
             }
+        }
+
+        //==immersive controls test==
+        if(PlayOptions.immersiveControls){
+            Pose gripPoint = handsActionSet.gripPoses[MCXRPlayClient.getMainHand()].getStagePose();
+            Vec3 gripPos = convert(gripPoint.getPos());
+            float delta = (time - lastPollTime) / 1_000_000_000f;
+            double velo = gripPos.distanceTo(gripPosOld)/delta;
+            //delay before attacking starts/stops by building up motion points
+            if(velo>1){motionPoints+=1*velo;}
+            else if(motionPoints>0){motionPoints-=1;}
+
+            gripPosOld=gripPos;
         }
 
         if (PlayOptions.smoothTurning) {
@@ -474,6 +493,40 @@ public final class XrInput {
                 long heldTime = predictedDisplayTime - actionSet.inventory.lastChangeTime;
                 if (heldTime * 1E-09 > 1) {
                     Minecraft.getInstance().pauseGame(false);
+                }
+            }
+
+            //==immersive control test
+            if(PlayOptions.immersiveControls){
+                var hitResult = Minecraft.getInstance().hitResult;
+                Pose handPoint = handsActionSet.aimPoses[MCXRPlayClient.getMainHand()].getMinecraftPose();
+                Vec3 handPos = convert(handPoint.getPos());
+                if(motionPoints>8){
+                    if (hitResult != null) {
+                        double dist = handPos.distanceTo(hitResult.getLocation());
+                        if(lastHit == null  || lastHit.equals(hitResult)) {
+                            if (hitResult.getType() == HitResult.Type.BLOCK && dist<0.2) {
+                                mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
+                                        GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
+                                lastHit = hitResult;
+                            } else if(hitResult.getType() == HitResult.Type.ENTITY && dist<4){
+                                mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
+                                        GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
+                                lastHit=hitResult;
+                            }
+                        } //else if (hitResult.getType() !=HitResult.Type.MISS && !lastHit.equals(hitResult)){//let go if hitting new block/entity
+                           // mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
+                                    //GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
+                            //lastHit=null;
+                            //motionPoints=0;
+                        //}
+                    }
+                }else if(motionPoints > 1) {//let go when no more motionPoints
+                    if(!actionSet.attack.currentState) {//only if not pressing attack
+                        mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
+                                GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
+                        lastHit=null;
+                    }
                 }
             }
         }

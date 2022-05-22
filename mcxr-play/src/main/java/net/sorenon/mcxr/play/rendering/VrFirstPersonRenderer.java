@@ -527,6 +527,7 @@ public class VrFirstPersonRenderer {
                         MapRenderer.renderFirstPersonMap(matrices, consumers, light, stack, false, handIndex== 0);
                     }
                     else {
+                        matrices.scale(1.5f,1.5f,1.5f);
                         Minecraft.getInstance().getItemInHandRenderer().renderItem(
                                 player,
                                 stack,
@@ -537,7 +538,6 @@ public class VrFirstPersonRenderer {
                                 light
                         );
                     }
-
                     matrices.popPose();
                 }
             }

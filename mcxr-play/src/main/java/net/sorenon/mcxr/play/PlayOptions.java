@@ -19,6 +19,7 @@ public class PlayOptions {
     public static boolean continuousSnapTurning = true;
     public static boolean snapTurnSound = true;
     public static float SnapTurnDelay = 0.25f;
+    public static boolean immersiveControls = true;
     public static boolean teleportEnabled=true;
     /**
      * The angle to rotate the player's in-game hand for a more comfortable experience
