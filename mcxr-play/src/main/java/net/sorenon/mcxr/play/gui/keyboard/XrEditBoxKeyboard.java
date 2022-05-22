@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DirectJoinServerScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -60,9 +61,9 @@ public class XrEditBoxKeyboard extends XrAbstract2DKeyboard {
             char[] searchChars = _placeholderField.getValue().toCharArray();
             Minecraft.getInstance().setScreen(_editScreen.getParentScreen());
             for (int i = 0; i < searchChars.length; i++) {
-                //_editScreen.charTyped(searchChars[0], 0);
                 Minecraft.getInstance().screen.charTyped(searchChars[i], 0);
             }
+
         } else {
 
             Minecraft.getInstance().setScreen(_editScreen.getParentScreen());

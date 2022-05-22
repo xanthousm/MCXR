@@ -209,7 +209,7 @@ public final class XrInput {
                     MCXRPlayClient.stagePosition = wantedPos.sub(newPos).mul(1, 0, 1);
 
                     if (PlayOptions.snapTurnSound) {
-                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.WOOL_STEP, 0.5f, 0.5f));
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.WOOL_STEP, 2.5f, 0.3f));
                     }
                 }
             }
@@ -231,7 +231,7 @@ public final class XrInput {
                     actionSet.turnActivated = true;
 
                     if (PlayOptions.snapTurnSound) {
-                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.WOOL_STEP, 0.5f, 0.5f));
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.WOOL_STEP, 2.5f, 0.3f));
                     }
                 }
             }

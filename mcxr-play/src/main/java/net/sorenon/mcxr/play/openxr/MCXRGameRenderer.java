@@ -338,11 +338,12 @@ public class MCXRGameRenderer {
 
             //sneaking, swimming offsets
             if (camEntity.isShiftKeyDown()) {
-                MCXRPlayClient.xrOrigin.y *= 0.65;
+                MCXRPlayClient.xrOrigin.y -= 0.25;
             }
-            if(camEntity.isSwimming()){
-                MCXRPlayClient.xrOrigin.y *= 0.15;
-            }
+
+            //if(camEntity.isSwimming()){//disabled since swimming hitbox is not 1x1
+            //    MCXRPlayClient.xrOrigin.y -= 0.7;
+            //}
 
             MCXRPlayClient.viewSpacePoses.updateGamePose(MCXRPlayClient.xrOrigin);
             for (var poses : XrInput.handsActionSet.gripPoses) {
