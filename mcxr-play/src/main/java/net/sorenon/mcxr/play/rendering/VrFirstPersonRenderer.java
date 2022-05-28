@@ -422,6 +422,11 @@ public class VrFirstPersonRenderer {
 
         matrices.translate(0, 1 / 16f, -1.5f / 16f);
         matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(PlayOptions.handPitchAdjust));
+
+        if (hand == MCXRPlayClient.getMainHand()) {
+            float swing = -0.1f * Mth.sin((float) (Math.sqrt(Minecraft.getInstance().player.getAttackAnim(tickDelta)) * Math.PI * 2));
+            matrices.translate(0,0, swing);
+        }
     }
 
     public void renderShadow(WorldRenderContext context, Entity camEntity) {
@@ -500,7 +505,7 @@ public class VrFirstPersonRenderer {
                     transformToHand(matrices, handIndex, deltaTick);
 
                     if (handIndex == MCXRPlayClient.getMainHand()) {
-                        float swing = -0.4f * Mth.sin((float) (Math.sqrt(player.getAttackAnim(deltaTick)) * Math.PI * 2));
+                        float swing = -0.6f * Mth.sin((float) (Math.sqrt(player.getAttackAnim(deltaTick)) * Math.PI * 2));
                         matrices.mulPose(com.mojang.math.Vector3f.XP.rotation(swing));
                     }
 

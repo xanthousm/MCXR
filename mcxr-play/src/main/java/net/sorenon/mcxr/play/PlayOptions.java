@@ -47,6 +47,12 @@ public class PlayOptions {
         fileConfig.set("snapTurnAmount", snapTurnAmount);
         fileConfig.set("smoothTurnRate", smoothTurnRate);
 
+        //====
+        fileConfig.set("continuousSnapTurning", continuousSnapTurning);
+        fileConfig.set("snapTurnSound", snapTurnSound);
+        fileConfig.set("SnapTurnDelay", SnapTurnDelay);
+        fileConfig.set("immersiveControls", immersiveControls);
+
         fileConfig.set("teleportEnabled", teleportEnabled);
 
         fileConfig.set("SSAA", SSAA);
@@ -67,6 +73,12 @@ public class PlayOptions {
         smoothTurning = fileConfig.getOrElse("smoothTurning", false);
         snapTurnAmount = fileConfig.<Number>getOrElse("snapTurnAmount", 22f).floatValue();
         smoothTurnRate = fileConfig.<Number>getOrElse("smoothTurnRate", 120f).floatValue();
+
+        //====
+        continuousSnapTurning=fileConfig.getOrElse("continuousSnapTurning",true);
+        snapTurnSound=fileConfig.getOrElse("snapTurnSound",true);
+        SnapTurnDelay=fileConfig.<Number>getOrElse("SnapTurnDelay",0.25f).floatValue();
+        immersiveControls=fileConfig.getOrElse("immersiveControls",true);
 
         teleportEnabled = fileConfig.getOrElse("teleportEnabled", true);
 
