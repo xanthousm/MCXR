@@ -12,8 +12,6 @@ import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.sorenon.mcxr.play.input.XrInput;
 import net.sorenon.mcxr.play.openxr.OpenXRInstance;
 import net.sorenon.mcxr.play.openxr.OpenXRState;
@@ -120,11 +118,11 @@ public class MCXROptionsScreen extends Screen {
                 this.height / 6 + 54 + 24 + 12,
                 150,
                 20,
-                PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.smooth_turning") : new TranslatableComponent("mcxr.options.snap_turning"),
+                PlayOptions.smoothTurning ? Component.translatable("mcxr.options.smooth_turning") : Component.translatable("mcxr.options.snap_turning"),
                 button -> {
                     PlayOptions.smoothTurning = !PlayOptions.smoothTurning;
                     PlayOptions.save();
-                    button.setMessage(PlayOptions.smoothTurning ? new TranslatableComponent("mcxr.options.smooth_turning") : new TranslatableComponent("mcxr.options.snap_turning"));
+                    button.setMessage(PlayOptions.smoothTurning ? Component.translatable("mcxr.options.smooth_turning") : Component.translatable("mcxr.options.snap_turning"));
                 }));
 
         this.addRenderableWidget(new Button(
@@ -132,11 +130,11 @@ public class MCXROptionsScreen extends Screen {
                 this.height / 6 + 54 + 24 * 2 + 12,
                 150,
                 20,
-                PlayOptions.teleportEnabled ? new TranslatableComponent("mcxr.options.teleportEnabled") : new TranslatableComponent("mcxr.options.teleportDisabled"),
+                PlayOptions.teleportEnabled ? Component.translatable("mcxr.options.teleportEnabled") : Component.translatable("mcxr.options.teleportDisabled"),
                 button -> {
                     PlayOptions.teleportEnabled = !PlayOptions.teleportEnabled;
                     PlayOptions.save();
-                    button.setMessage(PlayOptions.teleportEnabled ? new TranslatableComponent("mcxr.options.teleportEnabled") : new TranslatableComponent("mcxr.options.teleportDisabled"));
+                    button.setMessage(PlayOptions.teleportEnabled ? Component.translatable("mcxr.options.teleportEnabled") : Component.translatable("mcxr.options.teleportDisabled"));
                 }));
 
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.previous)));
