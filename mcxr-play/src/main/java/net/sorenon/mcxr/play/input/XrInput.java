@@ -55,7 +55,7 @@ public final class XrInput {
     private static Vec3 gripPosOld = new Vec3(0,0,0);
 
     private static int motionPoints = 0;
-    private static HitResult lastHit = null;
+    public static HitResult lastHit = null;
     public static boolean teleport = false;
 
 
@@ -166,7 +166,7 @@ public final class XrInput {
             float delta = (time - lastPollTime) / 1_000_000_000f;
             double velo = gripPos.distanceTo(gripPosOld)/delta;
             //delay before attacking starts/stops by building up motion points
-            if(velo>1 && motionPoints<24){motionPoints+=1*velo;}
+            if(velo>1 && motionPoints<24 && lastHit==null){motionPoints+=1*velo;}
             else if(motionPoints>0){motionPoints-=1;}
 
             gripPosOld=gripPos;
@@ -180,10 +180,11 @@ public final class XrInput {
                         if (hitResult.getType() == HitResult.Type.BLOCK && dist<0.4) {
                             mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                             //lastHit = hitResult;
-                        } else if(hitResult.getType() == HitResult.Type.ENTITY && dist<4 && velo>1){
+                        } else if(hitResult.getType() == HitResult.Type.ENTITY && dist<4 && velo>1.3 && lastHit==null){
                             mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
-                            //lastHit=hitResult;
-                            motionPoints=0;
+                            lastHit = hitResult;
+                            motionPoints=7;//delay to hit
+                            //Minecraft.getInstance().player.attack(Minecraft.getInstance().crosshairPickEntity);
                         }
                     //} //else if (hitResult.getType() !=HitResult.Type.MISS && !lastHit.equals(hitResult)){//let go if hitting new block/entity
                     // mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
@@ -194,8 +195,8 @@ public final class XrInput {
                 }
             }else if(motionPoints < 1) {//let go when no more motionPoints
                 if(!actionSet.attack.currentState) {//only if not pressing attack
+                    lastHit=null;
                     mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
-                    //lastHit=null;
                 }
             }
         }
@@ -263,26 +264,12 @@ public final class XrInput {
         }
         if (actionSet.hotbarLeft.currentState && actionSet.hotbarLeft.changedSinceLastSync) {
             if (Minecraft.getInstance().player != null) {
-                int selected = Minecraft.getInstance().player.getInventory().selected;
-                selected += 1;
-                while (selected < 0) {
-                    selected += 9;
-                }
-                while (selected >= 9) {
-                    selected -= 9;
-                }
+                Minecraft.getInstance().player.getInventory().swapPaint(+1);
             }
         }
         if (actionSet.hotbarRight.currentState && actionSet.hotbarRight.changedSinceLastSync) {
             if (Minecraft.getInstance().player != null) {
-                int selected = Minecraft.getInstance().player.getInventory().selected;
-                selected -= 1;
-                while (selected < 0) {
-                    selected += 9;
-                }
-                while (selected >= 9) {
-                    selected -= 9;
-                }
+                Minecraft.getInstance().player.getInventory().swapPaint(-1);
             }
         }
 

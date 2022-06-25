@@ -40,7 +40,11 @@ public class GameRendererMixin {
             Vector3f dir1 = pose.getOrientation().rotateX((float) Math.toRadians(PlayOptions.handPitchAdjust), new Quaternionf()).transform(new Vector3f(0, -1, 0));
             Vec3 dir = new Vec3(dir1.x, dir1.y, dir1.z);
             Vec3 endPos = pos.add(dir.scale(this.minecraft.gameMode.getPickRange()));
-            this.minecraft.hitResult = entity.level.clip(new ClipContext(pos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity));
+            if(XrInput.lastHit ==null) {
+                this.minecraft.hitResult = entity.level.clip(new ClipContext(pos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity));
+            } else{
+                this.minecraft.hitResult =XrInput.lastHit;
+            }
         }
     }
 
