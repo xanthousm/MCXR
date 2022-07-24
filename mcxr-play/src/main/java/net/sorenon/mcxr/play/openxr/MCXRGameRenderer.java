@@ -1,5 +1,6 @@
 package net.sorenon.mcxr.play.openxr;
 
+import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -13,14 +14,11 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -38,14 +36,14 @@ import net.sorenon.mcxr.core.MCXRCore;
 import net.sorenon.mcxr.core.Pose;
 import net.sorenon.mcxr.core.Teleport;
 import net.sorenon.mcxr.core.accessor.PlayerExt;
+import net.sorenon.mcxr.core.client.MCXRCoreClient;
 import net.sorenon.mcxr.core.mixin.LivingEntityAcc;
 import net.sorenon.mcxr.play.MCXRGuiManager;
 import net.sorenon.mcxr.play.MCXRPlayClient;
 import net.sorenon.mcxr.play.PlayOptions;
 import net.sorenon.mcxr.play.accessor.MinecraftExt;
-import net.sorenon.mcxr.play.input.actionsets.VanillaGameplayActionSet;
+import net.sorenon.mcxr.play.input.XrInput;
 import net.sorenon.mcxr.play.rendering.MCXRCamera;
-import net.sorenon.mcxr.play.rendering.MCXRMainTarget;
 import net.sorenon.mcxr.play.rendering.RenderPass;
 import net.sorenon.mcxr.play.rendering.XrRenderTarget;
 import org.apache.logging.log4j.LogManager;
@@ -54,13 +52,13 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
-import net.sorenon.mcxr.play.input.XrInput;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.Struct;
 
 import java.nio.IntBuffer;
 
+import static net.minecraft.client.Minecraft.ON_OSX;
 import static org.lwjgl.system.MemoryStack.stackCallocInt;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
@@ -68,7 +66,7 @@ public class MCXRGameRenderer {
     private static final Logger LOGGER = LogManager.getLogger();
     private Minecraft client;
     private MinecraftExt clientExt;
-    private MCXRMainTarget mainRenderTarget;
+    private MainTarget mainRenderTarget;
     private MCXRCamera camera;
 
     private OpenXRInstance instance;
@@ -76,15 +74,20 @@ public class MCXRGameRenderer {
 
     public RenderPass renderPass = RenderPass.VANILLA;
     public ShaderInstance blitShader;
+    public ShaderInstance blitShaderSRGB;
     public ShaderInstance guiBlitShader;
 
     private boolean xrDisabled = false;
     private boolean xrReady = true;
 
+    public boolean overrideWindowSize = false;
+    public int reloadingDepth = 0;
+    public boolean guiMode = false;
+
     public void initialize(Minecraft client) {
         this.client = client;
         this.clientExt = (MinecraftExt) client;
-        mainRenderTarget = (MCXRMainTarget) client.getMainRenderTarget();
+        mainRenderTarget = (MainTarget) client.getMainRenderTarget();
         camera = (MCXRCamera) client.gameRenderer.getMainCamera();
     }
 
@@ -160,6 +163,7 @@ public class MCXRGameRenderer {
 
     private Struct renderXrGame(long predictedDisplayTime, MemoryStack stack) {
 //        try (MemoryStack stack = stackPush()) {
+        this.overrideWindowSize = true;
 
         XrViewState viewState = XrViewState.calloc(stack).type(XR10.XR_TYPE_VIEW_STATE);
         IntBuffer intBuf = stackCallocInt(1);
@@ -206,12 +210,12 @@ public class MCXRGameRenderer {
                     ClientPlayNetworking.send(MCXRCore.IS_XR_PLAYER, buf);
                     acc.setIsXr(true);
                 }
-                MCXRCore.INSTANCE.setPlayerPoses(
+                MCXRCoreClient.INSTANCE.setPlayerPoses(
                         Minecraft.getInstance().player,
                         MCXRPlayClient.viewSpacePoses.getMinecraftPose(),
                         XrInput.handsActionSet.gripPoses[0].getMinecraftPose(),
                         XrInput.handsActionSet.gripPoses[1].getMinecraftPose(),
-                        MCXRPlayClient.viewSpacePoses.getPhysicalPose().getPos().y,
+//                        MCXRPlayClient.viewSpacePoses.getMinecraftPose().getPos().y - (float) player.position().y,
                         (float) Math.toRadians(PlayOptions.handPitchAdjust)
                 );
 
@@ -256,13 +260,10 @@ public class MCXRGameRenderer {
         client.getProfiler().pop();
 
         //Render GUI
-        mainRenderTarget.setFramebuffer(FGM.guiRenderTarget);
-        //Need to do this once framebuffer is gui
+        this.guiMode = true;
         XrInput.postTick(predictedDisplayTime);
-
-        mainRenderTarget.clear(Minecraft.ON_OSX);
         clientExt.doRender(true, frameStartTime, RenderPass.GUI);
-        mainRenderTarget.resetFramebuffer();
+        this.guiMode = false;
 
         FGM.guiPostProcessRenderTarget.bindWrite(true);
         this.guiBlitShader.setSampler("DiffuseSampler", FGM.guiRenderTarget.getColorTextureId());
@@ -273,6 +274,12 @@ public class MCXRGameRenderer {
         //pre-render overlays
 
         OpenXRSwapchain swapchain = session.swapchain;
+
+        if (swapchain.getRenderWidth() != mainRenderTarget.viewWidth || swapchain.getRenderHeight() != mainRenderTarget.viewHeight) {
+            mainRenderTarget.resize(swapchain.getRenderWidth(), swapchain.getRenderHeight(), ON_OSX);
+            client.gameRenderer.resize(swapchain.getRenderWidth(), swapchain.getRenderHeight());
+        }
+
         int swapchainImageIndex = swapchain.acquireImage();
 
         // Render view to the appropriate part of the swapchain image.
@@ -295,7 +302,6 @@ public class MCXRGameRenderer {
             } else {
                 swapchainFramebuffer = swapchain.rightFramebuffers[swapchainImageIndex];
             }
-            mainRenderTarget.setXrFramebuffer(swapchain.renderTarget);
             RenderPass.XrWorld worldRenderPass = RenderPass.XrWorld.create();
             worldRenderPass.fov = session.viewBuffer.get(viewIndex).fov();
             worldRenderPass.eyePoses.updatePhysicalPose(session.viewBuffer.get(viewIndex).pose(), MCXRPlayClient.stageTurn, frameUserScale);
@@ -305,18 +311,27 @@ public class MCXRGameRenderer {
             clientExt.doRender(true, frameStartTime, worldRenderPass);
 
             swapchainFramebuffer.bindWrite(true);
-            this.blitShader.setSampler("DiffuseSampler", swapchain.renderTarget.getColorTextureId());
-            Uniform inverseScreenSize = this.blitShader.getUniform("InverseScreenSize");
-            if (inverseScreenSize != null) {
-                inverseScreenSize.set(1f / swapchainFramebuffer.width, 1f / swapchainFramebuffer.height);
+            ShaderInstance blitShader;
+            if (swapchain.sRGB) {
+                blitShader = this.blitShaderSRGB;
+            } else {
+                blitShader = this.blitShader;
             }
-            swapchain.renderTarget.setFilterMode(GlConst.GL_LINEAR);
+
+            blitShader.setSampler("DiffuseSampler", mainRenderTarget.getColorTextureId());
+            Uniform inverseScreenSize = blitShader.getUniform("InverseScreenSize");
+            if (inverseScreenSize != null) {
+                inverseScreenSize.set(1f / mainRenderTarget.width, 1f / mainRenderTarget.height);
+            }
+
+            mainRenderTarget.setFilterMode(GlConst.GL_LINEAR);
             this.blit(swapchainFramebuffer, blitShader);
-//          ==render to eyes here after eye swapchain.rendertarget is sampled and blit-ed to swapchainFramebuffer (displayed image per eye?)==
+
+            //==render to eyes here after eye swapchain.rendertarget is sampled and blit-ed to swapchainFramebuffer (displayed image per eye?)==
             LocalPlayer player = this.client.player;
-            if(player!=null) {
+            if (player != null) {
                 //vanilla vignette
-                renderVignette(swapchainFramebuffer,cameraEntity);
+                renderVignette(swapchainFramebuffer, cameraEntity);
                 //portal
                 float g = Mth.lerp(client.getDeltaFrameTime(), player.oPortalTime, player.portalTime);
                 if (g > 0.0F && !player.hasEffect(MobEffects.CONFUSION)) {
@@ -324,33 +339,36 @@ public class MCXRGameRenderer {
                 }
                 //hurt
                 int hurtTime = player.hurtTime;
-                if(hurtTime>0){
-                    renderOverlay(swapchainFramebuffer,new ResourceLocation("textures/misc/hurt_vr.png"),0.4f,0f,0f,hurtTime*0.06f);
+                if (hurtTime > 0) {
+                    renderOverlay(swapchainFramebuffer, MCXRPlayClient.id("textures/misc/hurt_vr.png"), 0.4f, 0f, 0f, hurtTime * 0.06f);
                 }
                 //drowning
-                float drownPoint =Mth.clamp(2.5f*(0.7f-player.getAirSupply()/player.getMaxAirSupply()),0f,1f);
-                if(drownPoint>0f){
-                    renderOverlay(swapchainFramebuffer,new ResourceLocation("textures/misc/vignette_vr.png"),0.0f,0f,0.2f,drownPoint*0.9f);
+                float drownPoint = Mth.clamp(2.5f * (0.7f - (float) player.getAirSupply() / (float) player.getMaxAirSupply()), 0f, 1f);
+                if (drownPoint > 0f) {
+                    renderOverlay(swapchainFramebuffer, MCXRPlayClient.id("textures/misc/vignette_vr.png"), 0.0f, 0.0f, 0.25f, drownPoint * 0.9f);
                 }
                 //on fire
-                if(player.isOnFire()){
-                    renderOverlay(swapchainFramebuffer, new ResourceLocation("textures/misc/vignette_vr.png"),1f,0.7f,0.2f,0.9f);
+                if (player.isOnFire()) {
+                    renderOverlay(swapchainFramebuffer, MCXRPlayClient.id("textures/misc/vignette_vr.png"), 1f, 0.7f, 0.2f, 0.9f);
                 }
                 //frozen
                 if (player.getTicksFrozen() > 0) {
-                    float freeze = player.getPercentFrozen()*0.9f;
-                    renderOverlay(swapchainFramebuffer,new ResourceLocation("textures/misc/vignette_vr.png"),0.85f,0.85f,1f,freeze);
+                    float freeze = player.getPercentFrozen() * 0.9f;
+                    renderOverlay(swapchainFramebuffer, MCXRPlayClient.id("textures/misc/vignette_vr.png"), 0.85f, 0.85f, 1f, freeze);
                 }
                 //death point
-                float deathPoint =Mth.clamp(2.5f*(0.7f-player.getHealth()/player.getMaxHealth()),0f,1f);
-                if(deathPoint>0f){
-                    renderOverlay(swapchainFramebuffer,new ResourceLocation("textures/misc/vignette_vr.png"),0.4f,0f,0f,deathPoint*0.9f);
+                float deathPoint = Mth.clamp(2.5f * (0.7f - player.getHealth() / player.getMaxHealth()), 0f, 1f);
+                if (!player.isCreative() && deathPoint > 0f) {
+                    renderOverlay(swapchainFramebuffer, MCXRPlayClient.id("textures/misc/vignette_vr.png"), 0.4f, 0f, 0f, deathPoint * 0.9f);
                 }
             }
+
             swapchainFramebuffer.unbindWrite();
         }
 
-        blitToBackbuffer(swapchain.renderTarget);
+        this.overrideWindowSize = false;
+
+        blitToBackbuffer(mainRenderTarget);
 
         instance.checkPanic(XR10.xrReleaseSwapchainImage(
                 swapchain.handle,
@@ -358,7 +376,6 @@ public class MCXRGameRenderer {
                         .type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO)
         ), "xrReleaseSwapchainImage");
 
-        mainRenderTarget.resetFramebuffer();
         camera.setPose(MCXRPlayClient.viewSpacePoses.getMinecraftPose());
         clientExt.postRender();
 
@@ -418,14 +435,10 @@ public class MCXRGameRenderer {
                 MCXRPlayClient.xrOrigin.y += MCXRPlayClient.heightAdjust;
             }
 
-            //sneaking, swimming offsets
+            //sneaking camera shift
             if (camEntity.isShiftKeyDown()) {
                 MCXRPlayClient.xrOrigin.y -= 0.25;
             }
-
-            //if(camEntity.isSwimming()){//disabled since swimming hitbox is not 1x1
-            //    MCXRPlayClient.xrOrigin.y -= 0.7;
-            //}
 
             MCXRPlayClient.viewSpacePoses.updateGamePose(MCXRPlayClient.xrOrigin);
             for (var poses : XrInput.handsActionSet.gripPoses) {
@@ -470,7 +483,7 @@ public class MCXRGameRenderer {
             projectionLayerView.subImage().imageArrayIndex(0);
         }
 
-        session.swapchain.leftFramebuffers[swapchainImageIndex].clear(Minecraft.ON_OSX);
+        session.swapchain.leftFramebuffers[swapchainImageIndex].clear(ON_OSX);
 
         instance.checkPanic(XR10.xrReleaseSwapchainImage(
                 session.swapchain.handle,
@@ -535,8 +548,8 @@ public class MCXRGameRenderer {
         matrixStack.setIdentity();
         RenderSystem.applyModelViewMatrix();
 
-        int width = mainRenderTarget.minecraftMainRenderTarget.width;
-        int height = mainRenderTarget.minecraftMainRenderTarget.height;
+        int width = client.getWindow().getWidth();
+        int height = client.getWindow().getHeight();
 
         GlStateManager._colorMask(true, true, true, true);
         GlStateManager._disableDepthTest();
@@ -560,27 +573,24 @@ public class MCXRGameRenderer {
         float v = (widthNormalized / heightNormalized) / 2;
 
         //maintain screen's square aspect ratio
-        int xOff=0;
-        int yOff=0;
-        boolean fullImage=PlayOptions.fullMirror;
-        if(width>height){
-            if(fullImage) xOff=(width-height)/2;
-            else yOff=-(width-height)/2;
-        }
-        else{
-            if(fullImage) yOff=(height-width)/2;
-            else xOff=-(height-width)/2;
+        int xOff = 0;
+        int yOff = 0;
+        boolean uncroppedMirror = false;//if true, will show the full square camera with black bars. If false, will crop to fill screen.
+        if (width > height) {
+            if (uncroppedMirror) xOff = (width - height) / 2;
+            else yOff = -(width - height) / 2;
+        } else {
+            if (uncroppedMirror) yOff = (height - width) / 2;
+            else xOff = -(height - width) / 2;
         }
 
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(xOff, height-yOff, 0.0).uv(0.0F, 0.0f).color(255, 255, 255, 255).endVertex();
-        bufferBuilder.vertex(width-xOff, height-yOff, 0.0).uv(1, 0.0f).color(255, 255, 255, 255).endVertex();
-        bufferBuilder.vertex(width-xOff, yOff, 0.0).uv(1, 1.0f).color(255, 255, 255, 255).endVertex();
+        bufferBuilder.vertex(xOff, height - yOff, 0.0).uv(0.0F, 0.0f).color(255, 255, 255, 255).endVertex();
+        bufferBuilder.vertex(width - xOff, height - yOff, 0.0).uv(1, 0.0f).color(255, 255, 255, 255).endVertex();
+        bufferBuilder.vertex(width - xOff, yOff, 0.0).uv(1, 1.0f).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(xOff, yOff, 0.0).uv(0.0F, 1.0F).color(255, 255, 255, 255).endVertex();
-        //bufferBuilder.end();
-        //BufferUploader._endInternal(bufferBuilder);
         BufferUploader.draw(bufferBuilder.end());
         shader.clear();
         GlStateManager._depthMask(true);
@@ -589,8 +599,12 @@ public class MCXRGameRenderer {
         matrixStack.popPose();
     }
 
-    private void renderOverlay(RenderTarget framebuffer, ResourceLocation texture, float red, float green, float blue,float alpha) {
-        //ShaderInstance shader = Minecraft.getInstance().gameRenderer.blitShader;//to screen
+    private void renderOverlay(RenderTarget framebuffer,
+                               ResourceLocation texture,
+                               float red,
+                               float green,
+                               float blue,
+                               float alpha) {
         ShaderInstance shader = this.blitShader;//to eye
 
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
@@ -636,39 +650,29 @@ public class MCXRGameRenderer {
         shader.clear();
         GlStateManager._depthMask(true);
         GlStateManager._colorMask(true, true, true, true);
-        //GlStateManager._disableBlend();
 
         matrixStack.popPose();
     }
 
-    private void renderVignette(RenderTarget framebuffer,Entity entity) {
+    private void renderVignette(RenderTarget framebuffer, Entity entity) {
         WorldBorder worldBorder = this.client.level.getWorldBorder();
-        float f = (float)worldBorder.getDistanceToBorder(entity);
+        float f = (float) worldBorder.getDistanceToBorder(entity);
         double d = Math.min(
-                worldBorder.getLerpSpeed() * (double)worldBorder.getWarningTime() * 1000.0, Math.abs(worldBorder.getLerpTarget() - worldBorder.getSize())
+                worldBorder.getLerpSpeed() * (double) worldBorder.getWarningTime() * 1000.0, Math.abs(worldBorder.getLerpTarget() - worldBorder.getSize())
         );
-        double e = Math.max((double)worldBorder.getWarningBlocks(), d);
-        if ((double)f < e) {
-            f = 1.0F - (float)((double)f / e);
+        double e = Math.max(worldBorder.getWarningBlocks(), d);
+        if ((double) f < e) {
+            f = 1.0F - (float) ((double) f / e);
         } else {
             f = 0.0F;
         }
-        //RenderSystem.blendFuncSeparate(
-        //        GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-        //);
-        //breaks sky rendering in second viewindex, just use a pre-formatter png
-        //GlStateManager._blendFuncSeparate(GlStateManager.SourceFactor.ZERO.value, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR.value, GlStateManager.SourceFactor.ONE.value, GlStateManager.DestFactor.ZERO.value);
         if (f > 0.0F) {
             f = Mth.clamp(f, 0.0F, 1.0F);
-            //RenderSystem.setShaderColor(0.0F, f, f, 1.0F);
-            //renderOverlay(framebuffer, new ResourceLocation("textures/misc/vignette.png"),0f,f,f,1f);
-            renderOverlay(framebuffer, new ResourceLocation("textures/misc/vignette_vr.png"),0f,0f,0f,f);
+            renderOverlay(framebuffer, new ResourceLocation("textures/misc/vignette_vr.png"), 0f, 0f, 0f, f);
         } else {
             float l = LightTexture.getBrightness(entity.level.dimensionType(), entity.level.getMaxLocalRawBrightness(new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ())));
             float g = Mth.clamp(1.0F - l, 0.0F, 1.0F);
-            //RenderSystem.setShaderColor(g, g, g, 1.0F);
-            //renderOverlay(framebuffer, new ResourceLocation("textures/misc/vignette.png"),g,g,g,1f);
-            renderOverlay(framebuffer, new ResourceLocation("textures/misc/vignette_vr.png"),0f,0f,0f,g);
+            renderOverlay(framebuffer, new ResourceLocation("textures/misc/vignette_vr.png"), 0f, 0f, 0f, g);
         }
     }
 
@@ -727,7 +731,6 @@ public class MCXRGameRenderer {
         shader.clear();
         GlStateManager._depthMask(true);
         GlStateManager._colorMask(true, true, true, true);
-        //GlStateManager._disableBlend();
 
         matrixStack.popPose();
     }

@@ -34,7 +34,7 @@ public class PlayOptions {
     public static float SSAA = 1;
 
     public static void init() {
-        fileConfig = FileConfig.of(FabricLoader.getInstance().getConfigDir().resolve("mcxr-play.toml"));
+        fileConfig = FileConfig.of(FabricLoader.getInstance().getConfigDir().resolve(MCXRPlayClient.MODID + ".toml"));
     }
 
     public static void save() {
