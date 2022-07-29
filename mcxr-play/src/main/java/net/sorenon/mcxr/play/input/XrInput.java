@@ -1,10 +1,14 @@
 package net.sorenon.mcxr.play.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.math.Quaternion;
+import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
@@ -24,6 +28,7 @@ import net.sorenon.mcxr.play.openxr.OpenXRInstance;
 import net.sorenon.mcxr.play.openxr.OpenXRSession;
 import net.sorenon.mcxr.play.openxr.XrException;
 import net.sorenon.mcxr.play.openxr.XrRuntimeException;
+import net.sorenon.mcxr.play.rendering.MCXRCamera;
 import org.joml.Quaterniond;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -40,6 +45,7 @@ import java.util.List;
 
 import net.minecraft.sounds.SoundEvents;
 
+import net.minecraft.world.item.UseAnim;
 import static net.sorenon.mcxr.core.JOMLUtil.convert;
 import static org.lwjgl.system.MemoryStack.stackPointers;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -52,7 +58,9 @@ public final class XrInput {
 
     private static long lastPollTime = 0;
     private static long turnTime = 0;
-    private static Vec3 gripPosOld = new Vec3(0,0,0);
+    private static Pose gripPointOld = new Pose();
+    private static boolean reachBack = false;
+    private static int gestureDelay = 0;
 
     private static int motionPoints = 0;
     public static HitResult lastHit = null;
@@ -162,14 +170,25 @@ public final class XrInput {
         if(PlayOptions.immersiveControls){
             MouseHandlerAcc mouseHandler = (MouseHandlerAcc) Minecraft.getInstance().mouseHandler;
             Pose gripPoint = handsActionSet.gripPoses[MCXRPlayClient.getMainHand()].getStagePose();
-            Vec3 gripPos = convert(gripPoint.getPos());
+            Camera cam = Minecraft.getInstance().gameRenderer.getMainCamera();
             float delta = (time - lastPollTime) / 1_000_000_000f;
-            double velo = gripPos.distanceTo(gripPosOld)/delta;
+            //velocity calcs
+            Vec3 gripPos = convert(gripPoint.getPos());
+            Vec3 gripPosOld = convert(gripPointOld.getPos());
+            double velo = gripPos.distanceTo(gripPosOld) / delta;
+            //Quaternionf gripOri = gripPoint.getOrientation().normalize();
+            //Quaternionf gripOriDiff = gripOri.conjugate().mul(gripPointOld.getOrientation().normalize());
+            //double angVelo = gripOriDiff.angle()/ delta;
+            //Vector3f eulers = new Vector3f(0,0,0);
+            //gripOriDiff.getEulerAnglesZYX(eulers);
+            //double angVelo = convert(eulers).length()/ delta;
+            double angVelo = (Mth.abs(gripPoint.getMCPitch() - gripPointOld.getMCPitch())+Mth.abs(gripPoint.getMCYaw() - gripPointOld.getMCYaw()))/delta;
+            boolean moving=angVelo>20 || velo>1;
+
             //delay before attacking starts/stops by building up motion points
-            if(velo>1 && motionPoints<24 && lastHit==null){motionPoints+=1*velo;}
+            if(moving && motionPoints<24 && lastHit==null){motionPoints+=1*velo;}
             else if(motionPoints>0){motionPoints-=1;}
 
-            gripPosOld=gripPos;
             var hitResult = Minecraft.getInstance().hitResult;
             Pose handPoint = handsActionSet.aimPoses[MCXRPlayClient.getMainHand()].getMinecraftPose();
             Vec3 handPos = convert(handPoint.getPos());
@@ -177,10 +196,10 @@ public final class XrInput {
                 if (hitResult != null) {
                     double dist = handPos.distanceTo(hitResult.getLocation());
                     //if(lastHit == null  || lastHit.equals(hitResult)) {
-                        if (hitResult.getType() == HitResult.Type.BLOCK && dist<0.4) {
+                        if (hitResult.getType() == HitResult.Type.BLOCK && dist<0.3) {
                             mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                             //lastHit = hitResult;
-                        } else if(hitResult.getType() == HitResult.Type.ENTITY && dist<4 && velo>1.3 && lastHit==null){
+                        } else if(hitResult.getType() == HitResult.Type.ENTITY && dist<1 && velo>1.3 && lastHit==null){
                             mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                             lastHit = hitResult;
                             motionPoints=7;//delay to hit
@@ -199,6 +218,36 @@ public final class XrInput {
                     mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
                 }
             }
+
+            //==item eating==
+            InputConstants.Key useKey = Minecraft.getInstance().options.keyUse.getDefaultKey();
+            boolean edible=Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).isEdible() || Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).getUseAnimation() == UseAnim.DRINK;
+            Vec3 faceVec = handPos.subtract(cam.getPosition().add(cam.getLookVector().x()*0.15,-0.05+cam.getLookVector().y()*0.15,cam.getLookVector().z()*0.15));
+            if(edible && faceVec.length()<0.1 && moving){
+                KeyMapping.click(useKey);
+                KeyMapping.set(useKey, true);
+                gestureDelay=5;
+            }
+            else{
+                if(gestureDelay>0){gestureDelay-=1;}
+                if(!actionSet.use.currentState && gestureDelay==0){KeyMapping.set(useKey, false);}
+            }
+
+            //==item swapping==
+            Vec3 backVec = handPos.subtract(cam.getPosition().add(-cam.getLookVector().x()*0.2,-cam.getLookVector().y()*0.2,-cam.getLookVector().z()*0.2));
+            InputConstants.Key swapKey = Minecraft.getInstance().options.keySwapOffhand.getDefaultKey();
+            if(backVec.length()<0.17 && !reachBack){
+                KeyMapping.click(swapKey);
+                KeyMapping.set(swapKey, true);
+                reachBack=true;
+            } else {
+                KeyMapping.set(swapKey, false);
+                if(backVec.length()>0.18) {
+                    reachBack = false;
+                }
+            }
+
+            gripPointOld.set(gripPoint);
         }
 
         if (PlayOptions.smoothTurning) {
