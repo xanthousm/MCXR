@@ -60,9 +60,13 @@ public final class XrInput {
     private static long turnTime = 0;
     private static Pose gripPointOld = new Pose();
     private static boolean reachBack = false;
-    private static int gestureDelay = 0;
+    public static int eatDelay = 0;
+    public static int attackDelay = 0;
 
     private static int motionPoints = 0;
+    private static int minMotionPoints = 8;
+    public static int maxMotionPoints = 16;
+    public static float motionFrac = 0.0f;
     public static HitResult lastHit = null;
     public static boolean teleport = false;
 
@@ -184,53 +188,80 @@ public final class XrInput {
             //double angVelo = convert(eulers).length()/ delta;
             double angVelo = (Mth.abs(gripPoint.getMCPitch() - gripPointOld.getMCPitch())+Mth.abs(gripPoint.getMCYaw() - gripPointOld.getMCYaw()))/delta;
             boolean moving=angVelo>20 || velo>1;
+            boolean swinging = velo>0.8;
 
-            //delay before attacking starts/stops by building up motion points
-            if(moving && motionPoints<24 && lastHit==null){motionPoints+=1*velo;}
-            else if(motionPoints>0){motionPoints-=1;}
+            //delay before attacking starts by building up motion points, used to determine gesture delay
+            if(swinging && motionPoints<maxMotionPoints){motionPoints+=velo;}
+            else if(!swinging){motionPoints=0;}//resets when a swing ends
+            motionFrac=Mth.clamp(motionPoints,0,minMotionPoints)/(float)(minMotionPoints);
 
             var hitResult = Minecraft.getInstance().hitResult;
             Pose handPoint = handsActionSet.aimPoses[MCXRPlayClient.getMainHand()].getMinecraftPose();
             Vec3 handPos = convert(handPoint.getPos());
-            if(motionPoints>8){
-                if (hitResult != null) {
+            if(motionPoints > minMotionPoints) {
+                if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
                     double dist = handPos.distanceTo(hitResult.getLocation());
-                    //if(lastHit == null  || lastHit.equals(hitResult)) {
-                        if (hitResult.getType() == HitResult.Type.BLOCK && dist<0.3) {
-                            mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
-                            //lastHit = hitResult;
-                        } else if(hitResult.getType() == HitResult.Type.ENTITY && dist<1 && velo>1.3 && lastHit==null){
-                            mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
+                    double oldDist=0;
+                    if(lastHit!=null) {
+                        oldDist = handPos.distanceTo(lastHit.getLocation());
+                    }
+                    double minDist = Mth.lerp(motionFrac, 0.3, 1);
+                    if (lastHit == null || oldDist>dist) {//new target or closer target
+                        if (hitResult.getType() == HitResult.Type.BLOCK && dist < minDist) {
+                            //mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                             lastHit = hitResult;
-                            motionPoints=7;//delay to hit
-                            //Minecraft.getInstance().player.attack(Minecraft.getInstance().crosshairPickEntity);
+                            attackDelay = motionPoints;
+                            motionPoints=0;
+                        } else if (hitResult.getType() == HitResult.Type.ENTITY && dist < minDist*2) {
+                            //mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
+                            lastHit = hitResult;
+                            attackDelay = 4;
+                            motionPoints=0;
                         }
-                    //} //else if (hitResult.getType() !=HitResult.Type.MISS && !lastHit.equals(hitResult)){//let go if hitting new block/entity
-                    // mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
-                    //GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
-                    //lastHit=null;
-                    //motionPoints=0;
-                    //}
+                    } else {//continue on current target or let go
+                        if (hitResult.getType() == HitResult.Type.BLOCK && oldDist < minDist) {
+                            attackDelay = motionPoints;
+                            motionPoints=0;
+                        } else if (hitResult.getType() == HitResult.Type.ENTITY && oldDist < minDist*2) {
+                            //attackDelay = 4;
+                            //don't double click mobs
+                            motionPoints=0;
+                        }
+                        else{
+                            attackDelay = 0;
+                            motionPoints=0;
+                        }
+                    }
                 }
-            }else if(motionPoints < 1) {//let go when no more motionPoints
-                if(!actionSet.attack.currentState) {//only if not pressing attack
-                    lastHit=null;
-                    mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
+                else{//block broken, entity gone
+                    attackDelay = 0;
+                }
+            }
+            //decay attackDelay without conditions
+            if (attackDelay > 0) {
+                attackDelay -= 1;
+                mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
+            } else {//let go when no more attackDelay
+                lastHit = null;
+                if (!actionSet.attack.currentState) {//only if not pressing attack
+                    mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
                 }
             }
 
             //==item eating==
             InputConstants.Key useKey = Minecraft.getInstance().options.keyUse.getDefaultKey();
             boolean edible=Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).isEdible() || Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).getUseAnimation() == UseAnim.DRINK;
-            Vec3 faceVec = handPos.subtract(cam.getPosition().add(cam.getLookVector().x()*0.15,-0.05+cam.getLookVector().y()*0.15,cam.getLookVector().z()*0.15));
+            Vec3 faceVec = handPos.subtract(cam.getPosition().add(cam.getLookVector().x()*0.15,-0.03+cam.getLookVector().y()*0.15,cam.getLookVector().z()*0.15));
             if(edible && faceVec.length()<0.1 && moving){
                 KeyMapping.click(useKey);
                 KeyMapping.set(useKey, true);
-                gestureDelay=5;
+                eatDelay=5;
             }
             else{
-                if(gestureDelay>0){gestureDelay-=1;}
-                if(!actionSet.use.currentState && gestureDelay==0){KeyMapping.set(useKey, false);}
+                if(eatDelay>0){eatDelay-=1;}
+                if(!actionSet.use.currentState && eatDelay==0){
+                    KeyMapping.set(useKey, false);
+                }
             }
 
             //==item swapping==
@@ -530,7 +561,8 @@ public final class XrInput {
                 if (actionSet.attack.currentState) {
                     mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(),
                             GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
-                    motionPoints=0;
+                    attackDelay=0;
+                    lastHit=null;
                 }
             }
             if (!actionSet.attack.currentState) {
