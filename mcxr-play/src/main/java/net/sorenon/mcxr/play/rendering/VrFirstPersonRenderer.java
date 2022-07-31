@@ -550,11 +550,9 @@ public class VrFirstPersonRenderer {
                     MapRenderer.renderFirstPersonMap(matrices, consumers, light, stack, false, handIndex== 0);
                 }
                 else {
-                    if ((XrInput.motionFrac>0 || FGM.isScreenOpen()) && handIndex == MCXRPlayClient.getMainHand()){//item tilted forward in menu or when swinging
+                    //item tilted forward in menu
+                    if ((FGM.isScreenOpen() || (XrInput.motionFrac>0 && XrInput.eatDelay==0)) && handIndex == MCXRPlayClient.getMainHand()){
                         float tiltAngle=-80;
-                        if(!FGM.isScreenOpen()){
-                            tiltAngle*=XrInput.motionFrac;
-                        }
                         matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(tiltAngle), 0, 0));
                         matrices.translate(0, 0, -0.2);
                     }

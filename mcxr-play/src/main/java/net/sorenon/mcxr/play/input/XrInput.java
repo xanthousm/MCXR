@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.*;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
@@ -45,7 +46,6 @@ import java.util.List;
 
 import net.minecraft.sounds.SoundEvents;
 
-import net.minecraft.world.item.UseAnim;
 import static net.sorenon.mcxr.core.JOMLUtil.convert;
 import static org.lwjgl.system.MemoryStack.stackPointers;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -63,6 +63,7 @@ public final class XrInput {
     public static int eatDelay = 0;
     public static int attackDelay = 0;
 
+    private static float minHitVelo = 2f;
     private static int motionPoints = 0;
     private static int minMotionPoints = 8;
     public static int maxMotionPoints = 16;
@@ -172,6 +173,7 @@ public final class XrInput {
 
         //==immersive controls test==
         if(PlayOptions.immersiveControls){
+            ItemStack held = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND);
             MouseHandlerAcc mouseHandler = (MouseHandlerAcc) Minecraft.getInstance().mouseHandler;
             Pose gripPoint = handsActionSet.gripPoses[MCXRPlayClient.getMainHand()].getStagePose();
             Camera cam = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -187,13 +189,15 @@ public final class XrInput {
             //gripOriDiff.getEulerAnglesZYX(eulers);
             //double angVelo = convert(eulers).length()/ delta;
             double angVelo = (Mth.abs(gripPoint.getMCPitch() - gripPointOld.getMCPitch())+Mth.abs(gripPoint.getMCYaw() - gripPointOld.getMCYaw()))/delta;
-            boolean moving=angVelo>20 || velo>1;
+            boolean moving=angVelo>50 || velo>1;
             boolean swinging = velo>0.8;
 
             //delay before attacking starts by building up motion points, used to determine gesture delay
             if(swinging && motionPoints<maxMotionPoints){motionPoints+=velo;}
             else if(!swinging){motionPoints=0;}//resets when a swing ends
-            motionFrac=Mth.clamp(motionPoints,0,minMotionPoints)/(float)(minMotionPoints);
+            //motionFrac=(float)Mth.clamp(velo/minHitVelo,0f,1f);//for velocity-based animation
+            if(velo>minHitVelo && motionPoints > minMotionPoints){motionFrac=1;}
+            else if(velo<minHitVelo*0.4 && motionPoints < minMotionPoints){motionFrac=0;}
 
             var hitResult = Minecraft.getInstance().hitResult;
             Pose handPoint = handsActionSet.aimPoses[MCXRPlayClient.getMainHand()].getMinecraftPose();
@@ -205,40 +209,37 @@ public final class XrInput {
                     if(lastHit!=null) {
                         oldDist = handPos.distanceTo(lastHit.getLocation());
                     }
-                    double minDist = Mth.lerp(motionFrac, 0.3, 1);
+                    double minDist = 0.3;
+                    if(held.getItem() instanceof SwordItem || held.getItem() instanceof DiggerItem || held.getItem() instanceof TridentItem){
+                        minDist = 1.3;
+                    }
                     if (lastHit == null || oldDist>dist) {//new target or closer target
-                        if (hitResult.getType() == HitResult.Type.BLOCK && dist < minDist) {
+                        if (hitResult.getType() == HitResult.Type.BLOCK && dist < minDist && velo>minHitVelo) {
                             //mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                             lastHit = hitResult;
                             attackDelay = motionPoints;
-                            motionPoints=0;
-                        } else if (hitResult.getType() == HitResult.Type.ENTITY && dist < minDist*2) {
+                            //motionPoints=0;//allow swing to hit multiple items
+                        } else if (hitResult.getType() == HitResult.Type.ENTITY && dist < minDist*2 && velo>minHitVelo) {
                             //mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                             lastHit = hitResult;
                             attackDelay = 4;
-                            motionPoints=0;
+                            //motionPoints=0;
                         }
-                    } else {//continue on current target or let go
-                        if (hitResult.getType() == HitResult.Type.BLOCK && oldDist < minDist) {
+                    } else {//continue on current target or let go, with larger leeway to continue swings
+                        if (hitResult.getType() == HitResult.Type.BLOCK && oldDist < minDist*2) {
                             attackDelay = motionPoints;
-                            motionPoints=0;
-                        } else if (hitResult.getType() == HitResult.Type.ENTITY && oldDist < minDist*2) {
+                            //motionPoints=0;
+                        } else if (hitResult.getType() == HitResult.Type.ENTITY && oldDist < minDist*4) {
                             //attackDelay = 4;
                             //don't double click mobs
-                            motionPoints=0;
-                        }
-                        else{
-                            attackDelay = 0;
-                            motionPoints=0;
+                            //motionPoints=0;
                         }
                     }
                 }
-                else{//block broken, entity gone
-                    attackDelay = 0;
-                }
+                //todo - if block broken then let go (attackDelay = 0;)
             }
             //decay attackDelay without conditions
-            if (attackDelay > 0) {
+            if (attackDelay > 1) {
                 attackDelay -= 1;
                 mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
             } else {//let go when no more attackDelay
@@ -250,7 +251,7 @@ public final class XrInput {
 
             //==item eating==
             InputConstants.Key useKey = Minecraft.getInstance().options.keyUse.getDefaultKey();
-            boolean edible=Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).isEdible() || Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).getUseAnimation() == UseAnim.DRINK;
+            boolean edible=held.isEdible() || held.getUseAnimation() == UseAnim.DRINK;
             Vec3 faceVec = handPos.subtract(cam.getPosition().add(cam.getLookVector().x()*0.15,-0.03+cam.getLookVector().y()*0.15,cam.getLookVector().z()*0.15));
             if(edible && faceVec.length()<0.1 && moving){
                 KeyMapping.click(useKey);
@@ -262,6 +263,7 @@ public final class XrInput {
                 if(!actionSet.use.currentState && eatDelay==0){
                     KeyMapping.set(useKey, false);
                 }
+                if(eatDelay==0 && faceVec.length()<0.1){eatDelay=1;}//for item near face animation
             }
 
             //==item swapping==
