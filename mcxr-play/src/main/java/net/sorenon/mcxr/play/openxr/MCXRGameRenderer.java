@@ -8,7 +8,6 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-//import com.mojang.math.Vector3f;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.Util;
@@ -270,8 +269,6 @@ public class MCXRGameRenderer {
         this.guiBlitShader.setSampler("DepthSampler", FGM.guiRenderTarget.getDepthTextureId());
         this.blit(FGM.guiPostProcessRenderTarget, guiBlitShader);
         FGM.guiPostProcessRenderTarget.unbindWrite();
-
-        //pre-render overlays
 
         OpenXRSwapchain swapchain = session.swapchain;
 

@@ -31,12 +31,6 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.BlockHitResult;
@@ -54,7 +48,6 @@ import net.sorenon.mcxr.play.openxr.MCXRGameRenderer;
 import net.tr7zw.MapRenderer;
 import org.joml.Math;
 import org.joml.Quaternionf;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
@@ -65,7 +58,6 @@ import java.util.function.Supplier;
 
 import static net.minecraft.client.gui.GuiComponent.GUI_ICONS_LOCATION;
 import static net.minecraft.client.renderer.block.model.ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND;
-import static net.minecraft.world.item.UseAnim.BLOCK;
 import static net.sorenon.mcxr.core.JOMLUtil.convert;
 
 //TODO third person renderer
@@ -328,10 +320,7 @@ public class VrFirstPersonRenderer {
                     VertexConsumer consumer = consumers.getBuffer(LINE_CUSTOM_ALWAYS.apply(2.0));
                     consumer.vertex(model, 0, 0, 0).color(0.1f, 0.1f, 0.1f, 1f).normal(normal, 0, -1, 0).endVertex();
                     consumer.vertex(model, 0, -0.5f, 0).color(0.1f, 0.1f, 0.1f, 1f).normal(normal, 0, -1, 0).endVertex();
-
-                    //consumer = consumers.getBuffer(LINE_CUSTOM.apply(4.0, false));
-                    //consumer.vertex(model, 0, 0, 0).color(1f, 1f, 1f, 1f).normal(normal, 0, -1, 0).endVertex();
-                    //consumer.vertex(model, 0, -1, 0).color(1f, 1f, 1f, 1f).normal(normal, 0, -1, 0).endVertex();
+                    //removed second pointer line since gui now has cursor
                 }
             }
 
@@ -529,8 +518,6 @@ public class VrFirstPersonRenderer {
         consumer.vertex(modelMatrix, -x, 0, 0).color(255, 255, 255, 255).uv(1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(normalMatrix, 0, 0, -1).endVertex();
     }
 
-
-
     public void render(LocalPlayer player,
                        int light,
                        PoseStack matrices,
@@ -546,7 +533,7 @@ public class VrFirstPersonRenderer {
             if (player.getMainArm() == HumanoidArm.LEFT) {
                 stack = handIndex == 1 ? player.getOffhandItem() : player.getMainHandItem();
             }
-            if (FGM.isScreenOpen()) {//in menu
+            if (FGM.isScreenOpen()) {//in menu hold picked item
                 if(handIndex == MCXRPlayClient.getMainHand()){
                     //stack = player.containerMenu.getCarried();//breaks with enchanted items
                     //stack = ItemStack.of(player.inventoryMenu.getCarried().getOrCreateTag());
@@ -633,7 +620,6 @@ public class VrFirstPersonRenderer {
                 }
                 matrices.popPose();
             }
-
 
             //Draw hand
             matrices.pushPose();
