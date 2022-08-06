@@ -365,7 +365,7 @@ public class VrFirstPersonRenderer {
         }
 
         //TODO - reset gui pos notification
-        if (FGM.isScreenOpen() && FGM.position.distanceTo(JOMLUtil.convert(MCXRPlayClient.viewSpacePoses.getUnscaledPhysicalPose().pos)) > 1 || true) {
+        if (FGM.isScreenOpen() && FGM.position.distanceTo(JOMLUtil.convert(MCXRPlayClient.viewSpacePoses.getUnscaledPhysicalPose().pos)) > 2) {
             matrices.pushPose();
 
             transformToHand(matrices, 1 - MCXRPlayClient.getMainHand(), context.tickDelta());
@@ -576,13 +576,13 @@ public class VrFirstPersonRenderer {
                     MapRenderer.renderFirstPersonMap(matrices, consumers, light, stack, false, handIndex== 0);
                 }
                 else {
-                    //item tilted forward in menu
-                    if ((FGM.isScreenOpen() || (XrInput.motionFrac>0 && XrInput.eatDelay==0)) && handIndex == MCXRPlayClient.getMainHand()){
+                    //item tilted forward in menu or for tool using motion controls
+                    if ((FGM.isScreenOpen() || XrInput.extendReach>0) && handIndex == MCXRPlayClient.getMainHand()){
                         float tiltAngle=-80;
                         matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(tiltAngle), 0, 0));
-                        matrices.translate(0, 0, -0.2);
+                        matrices.translate(0, 0, -0.25);
                     }
-                    if ((XrInput.eatDelay==0 && !FGM.isScreenOpen()) || handIndex != MCXRPlayClient.getMainHand()){//room scale items if not eating, in inventory
+                    if ((XrInput.eatDelay==0 && !FGM.isScreenOpen()) || handIndex != MCXRPlayClient.getMainHand()){//room scale items if not eating/in inventory
                         matrices.scale(1.5f, 1.5f, 1.5f);
                     }
 

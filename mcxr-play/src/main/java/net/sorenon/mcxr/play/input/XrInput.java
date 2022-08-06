@@ -7,9 +7,12 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
@@ -63,12 +66,13 @@ public final class XrInput {
     public static int eatDelay = 0;
     public static int attackDelay = 0;
 
-    private static float minHitVelo = 2f;
+    private static float minHitVelo = 2.5f;
     private static int motionPoints = 0;
     private static int minMotionPoints = 8;
     public static int maxMotionPoints = 16;
-    public static float motionFrac = 0.0f;
+    public static float extendReach = 0.0f;
     public static HitResult lastHit = null;
+    public static HitResult newHit = null;
     public static boolean teleport = false;
 
 
@@ -193,60 +197,65 @@ public final class XrInput {
             boolean swinging = velo>0.8;
 
             //delay before attacking starts by building up motion points, used to determine gesture delay
-            if(swinging && motionPoints<maxMotionPoints){motionPoints+=velo;}
+            if(swinging && motionPoints<maxMotionPoints){motionPoints+=velo+0.3;}
             else if(!swinging){motionPoints=0;}//resets when a swing ends
-            //motionFrac=(float)Mth.clamp(velo/minHitVelo,0f,1f);//for velocity-based animation
-            if(velo>minHitVelo && motionPoints > minMotionPoints){motionFrac=1;}
-            else if(velo<minHitVelo*0.4 && motionPoints < minMotionPoints){motionFrac=0;}
 
-            var hitResult = Minecraft.getInstance().hitResult;
+            //distance for hit detection
+            if(held.getItem() instanceof SwordItem || held.getItem() instanceof DiggerItem || held.getItem() instanceof TridentItem){
+                extendReach=0.7f;
+            }
+            else{extendReach=0.0f;}
+            double minDist = 0.3+extendReach;
+
+            HitResult hitResult = Minecraft.getInstance().hitResult;//=last hit or new hit
+            //newHit = Minecraft.getInstance().hitResult;
             Pose handPoint = handsActionSet.aimPoses[MCXRPlayClient.getMainHand()].getMinecraftPose();
             Vec3 handPos = convert(handPoint.getPos());
-            if(motionPoints > minMotionPoints) {
-                if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
-                    double dist = handPos.distanceTo(hitResult.getLocation());
-                    double oldDist=0;
-                    if(lastHit!=null) {
-                        oldDist = handPos.distanceTo(lastHit.getLocation());
-                    }
-                    double minDist = 0.3;
-                    if(held.getItem() instanceof SwordItem || held.getItem() instanceof DiggerItem || held.getItem() instanceof TridentItem){
-                        minDist = 1.3;
-                    }
-                    if (lastHit == null || oldDist>dist) {//new target or closer target
-                        if (hitResult.getType() == HitResult.Type.BLOCK && dist < minDist && velo>minHitVelo) {
-                            //mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
-                            lastHit = hitResult;
-                            attackDelay = motionPoints;
-                            //motionPoints=0;//allow swing to hit multiple items
-                        } else if (hitResult.getType() == HitResult.Type.ENTITY && dist < minDist*2 && velo>minHitVelo) {
-                            //mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
-                            lastHit = hitResult;
-                            attackDelay = 4;
-                            //motionPoints=0;
+
+            if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {//something in ray
+                double curDist = handPos.distanceTo(hitResult.getLocation());
+                double newDist = handPos.distanceTo(newHit.getLocation());//using this doesn't detect entities?
+                double oldDist=0;
+                if(lastHit!=null) {
+                    oldDist = handPos.distanceTo(lastHit.getLocation());
+                }
+
+                if (lastHit == null || (oldDist-0.1)>newDist) {//new target or closer target
+                    if(velo>minHitVelo) {
+                        if (hitResult.getType() == HitResult.Type.ENTITY && curDist<minDist) {
+                            attackDelay = 5;
+                            lastHit = hitResult;//some reason newHit doesn't work for entities.
                         }
-                    } else {//continue on current target or let go, with larger leeway to continue swings
-                        if (hitResult.getType() == HitResult.Type.BLOCK && oldDist < minDist*2) {
-                            attackDelay = motionPoints;
-                            //motionPoints=0;
-                        } else if (hitResult.getType() == HitResult.Type.ENTITY && oldDist < minDist*4) {
-                            //attackDelay = 4;
-                            //don't double click mobs
-                            //motionPoints=0;
+                        else if (hitResult.getType() == HitResult.Type.BLOCK && newDist<minDist) {
+                            if(lastHit == null || (lastHit != null && lastHit.getType() == HitResult.Type.BLOCK)) {
+                                attackDelay = motionPoints;
+                                lastHit = newHit;
+                            }
                         }
                     }
                 }
-                //todo - if block broken then let go (attackDelay = 0;)
+                else if (lastHit.getType() == HitResult.Type.BLOCK){//continue on current target or let go, with larger leeway to continue swings
+                    if (hitResult.getType() == HitResult.Type.ENTITY && velo>minHitVelo) {//prioritise entites in range, doesnt work since newHit doesn't like entities
+                        lastHit = newHit;
+                        attackDelay = 5;
+                    }
+                    else if (oldDist < minDist*1.2) {//continue clicking
+                        attackDelay += motionPoints;
+                    }
+                }
             }
+
             //decay attackDelay without conditions
-            if (attackDelay > 1) {
+            if (attackDelay > 0) {
                 attackDelay -= 1;
                 mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
-            } else {//let go when no more attackDelay
-                lastHit = null;
+                if(attackDelay>maxMotionPoints)attackDelay=maxMotionPoints;
+            }
+            else {
                 if (!actionSet.attack.currentState) {//only if not pressing attack
                     mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
                 }
+                lastHit = null;
             }
 
             //==item eating==
@@ -578,5 +587,9 @@ public final class XrInput {
                 }
             }
         }
+    }
+
+    public static void setNewHit(HitResult hit) {
+        newHit=hit;
     }
 }
