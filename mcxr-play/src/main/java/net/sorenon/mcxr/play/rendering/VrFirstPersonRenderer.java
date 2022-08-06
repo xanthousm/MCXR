@@ -577,7 +577,7 @@ public class VrFirstPersonRenderer {
                 }
                 else {
                     //item tilted forward in menu or for tool using motion controls
-                    if ((FGM.isScreenOpen() || XrInput.extendReach>0) && handIndex == MCXRPlayClient.getMainHand()){
+                    if ((FGM.isScreenOpen() || (XrInput.extendReach>0 && PlayOptions.immersiveControls)) && handIndex == MCXRPlayClient.getMainHand()){
                         float tiltAngle=-80;
                         matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(tiltAngle), 0, 0));
                         matrices.translate(0, 0, -0.25);

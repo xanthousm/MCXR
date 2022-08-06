@@ -15,6 +15,10 @@
   "mcxr.options.snap_turning": "Camera Turning: Snap",
   "mcxr.options.teleportEnabled": "Teleporting: Enabled",
   "mcxr.options.teleportDisabled": "Teleporting: Disabled",
+  "mcxr.options.immersive_on": "Immersive Controls: Enabled",
+  "mcxr.options.immersive_off": "Immersive Controls: Disabled",
+  "mcxr.options.height_real" : "Player Height: Real",
+  "mcxr.options.height_vanilla" : "Player Height: Vanilla",
 
   "mcxr.menu.reload": "Reload Headset",
   "mcxr.menu.session_not_created": "No headset found:",
@@ -49,5 +53,7 @@
 
   "mcxr.actionset.hands": "Hands",
   "mcxr.action.aim": "Aim Pose",
-  "mcxr.action.grip": "Grip Pose"
+  "mcxr.action.grip": "Grip Pose",
+
+  "mcxr.quick_menu": "Quick Menu"
 }

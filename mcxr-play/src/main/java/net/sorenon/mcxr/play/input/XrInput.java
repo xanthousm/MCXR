@@ -222,7 +222,7 @@ public final class XrInput {
 
                 if (lastHit == null || (oldDist-0.1)>newDist) {//new target or closer target
                     if(velo>minHitVelo) {
-                        if (hitResult.getType() == HitResult.Type.ENTITY && curDist<minDist) {
+                        if (hitResult.getType() == HitResult.Type.ENTITY && curDist<minDist+1.0) {//make hit distance for entities more practical
                             attackDelay = 5;
                             lastHit = hitResult;//some reason newHit doesn't work for entities.
                         }
@@ -239,7 +239,8 @@ public final class XrInput {
                         lastHit = newHit;
                         attackDelay = 5;
                     }
-                    else if (oldDist < minDist*1.2) {//continue clicking
+                    //else if (oldDist < minDist*1.2) {//continue clicking
+                    else if (lastHit.getLocation().distanceTo(newHit.getLocation()) < 0.3) {//continue clicking
                         attackDelay += motionPoints;
                     }
                 }
@@ -402,7 +403,7 @@ public final class XrInput {
             if (!actionSet.quickmenu.currentState) {
                 Minecraft client = Minecraft.getInstance();
                 if (client.screen == null) {
-                    client.setScreen(new QuickMenu("QuickMenu"));
+                    client.setScreen(new QuickMenu(Component.translatable("mcxr.quick_menu")));
                 }
             }
         }

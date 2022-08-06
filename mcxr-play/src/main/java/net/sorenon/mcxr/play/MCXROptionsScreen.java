@@ -110,6 +110,17 @@ public class MCXROptionsScreen extends Screen {
                     button.setMessage(Component.translatable("mcxr.options.fly_direction", PlayOptions.flyDirection.toComponent()));
                 }));
 
+        this.addRenderableWidget(new Button(
+                this.width / 2 - 155,
+                this.height / 6 + 54 + 24 * 3 + 12,
+                150,
+                20,
+                MCXRPlayClient.heightAdjustStand ? Component.translatable("mcxr.options.height_vanilla") : Component.translatable("mcxr.options.height_real"),
+                button -> {
+                    MCXRPlayClient.heightAdjustStand = !MCXRPlayClient.heightAdjustStand;
+                    button.setMessage(MCXRPlayClient.heightAdjustStand ? Component.translatable("mcxr.options.height_vanilla") : Component.translatable("mcxr.options.height_real"));
+                }));
+
         assert this.minecraft != null;
         this.addRenderableWidget(Minecraft.getInstance().options.mainHand().createButton(this.minecraft.options, this.width / 2 - 155 + 160, this.height / 6 + 54 + 12, 150));
 
@@ -128,6 +139,18 @@ public class MCXROptionsScreen extends Screen {
         this.addRenderableWidget(new Button(
                 this.width / 2 - 155 + 160,
                 this.height / 6 + 54 + 24 * 2 + 12,
+                150,
+                20,
+                PlayOptions.immersiveControls ? Component.translatable("mcxr.options.immersive_on") : Component.translatable("mcxr.options.immersive_off"),
+                button -> {
+                    PlayOptions.immersiveControls = !PlayOptions.immersiveControls;
+                    PlayOptions.save();
+                    button.setMessage(PlayOptions.immersiveControls ? Component.translatable("mcxr.options.immersive_on") : Component.translatable("mcxr.options.immersive_off"));
+                }));
+
+        this.addRenderableWidget(new Button(
+                this.width / 2 - 155 + 160,
+                this.height / 6 + 54 + 24 * 3 + 12,
                 150,
                 20,
                 PlayOptions.teleportEnabled ? Component.translatable("mcxr.options.teleportEnabled") : Component.translatable("mcxr.options.teleportDisabled"),
