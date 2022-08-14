@@ -51,8 +51,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
-import net.tr7zw.MapRenderer;
-
 import java.util.OptionalDouble;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -60,7 +58,6 @@ import java.util.function.Supplier;
 
 import static net.minecraft.client.gui.GuiComponent.GUI_ICONS_LOCATION;
 import static net.minecraft.client.renderer.block.model.ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND;
-import static net.minecraft.world.item.UseAnim.BLOCK;
 import static net.sorenon.mcxr.core.JOMLUtil.convert;
 
 //TODO third person renderer
@@ -178,16 +175,22 @@ public class VrFirstPersonRenderer {
                     matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(90.0F));
                 }
 
+                //cursor render part 1 (over water) - also in MCXRPlayClient.java
                 matrices.scale(0.5f, 1, 0.5f);
                 RenderType SHADOW_LAYER = RenderType.entityCutoutNoCull(GUI_ICONS_LOCATION);
                 VertexConsumer vertexConsumer = consumers.getBuffer(SHADOW_LAYER);
 
+                float hitC = 1.0f;
+                if(XrInput.lastHit!=null){
+                    //matrices.mulPose(com.mojang.math.Vector3f.YP.rotationDegrees(45.0F));
+                    hitC=XrInput.attackDelay/(float)(XrInput.maxMotionPoints);
+                }
                 PoseStack.Pose entry = matrices.last();
 
-                vertexConsumer.vertex(entry.pose(), -0.3f + (0.5f / 16f), 0.005f, -0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
-                vertexConsumer.vertex(entry.pose(), -0.3f + (0.5f / 16f), 0.005f, 0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
-                vertexConsumer.vertex(entry.pose(), 0.3f + (0.5f / 16f), 0.005f, 0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0.0625f, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
-                vertexConsumer.vertex(entry.pose(), 0.3f + (0.5f / 16f), 0.005f, -0.3f + (0.5f / 16f)).color(1.0F, 1.0F, 1.0F, 1.0f).uv(0.0625f, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                vertexConsumer.vertex(entry.pose(), -0.3f + (0.5f / 16f), 0.005f, -0.3f + (0.5f / 16f)).color(1.0F, hitC, hitC, 1.0f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                vertexConsumer.vertex(entry.pose(), -0.3f + (0.5f / 16f), 0.005f, 0.3f + (0.5f / 16f)).color(1.0F, hitC, hitC, 1.0f).uv(0, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                vertexConsumer.vertex(entry.pose(), 0.3f + (0.5f / 16f), 0.005f, 0.3f + (0.5f / 16f)).color(1.0F, hitC, hitC, 1.0f).uv(0.0625f, 0.0625f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
+                vertexConsumer.vertex(entry.pose(), 0.3f + (0.5f / 16f), 0.005f, -0.3f + (0.5f / 16f)).color(1.0F, hitC, hitC, 1.0f).uv(0.0625f, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880).normal(0.0F, 0.0F, 1.0F).endVertex();
 
                 matrices.popPose();
             }
@@ -209,7 +212,7 @@ public class VrFirstPersonRenderer {
             Vec3 gripPos = convert(pose.getPos());
             Vec3 camPos = context.camera().getPosition();
 
-            if (handIndex != MCXRPlayClient.getMainHand() && XrInput.vanillaGameplayActionSet.teleport.currentState) {
+            if (handIndex != MCXRPlayClient.getMainHand() && XrInput.vanillaGameplayActionSet.teleport.currentState && PlayOptions.teleportEnabled) {
                 matrices.pushPose();
 
                 matrices.translate(-camPos.x, -camPos.y, -camPos.z);
@@ -317,10 +320,7 @@ public class VrFirstPersonRenderer {
                     VertexConsumer consumer = consumers.getBuffer(LINE_CUSTOM_ALWAYS.apply(2.0));
                     consumer.vertex(model, 0, 0, 0).color(0.1f, 0.1f, 0.1f, 1f).normal(normal, 0, -1, 0).endVertex();
                     consumer.vertex(model, 0, -0.5f, 0).color(0.1f, 0.1f, 0.1f, 1f).normal(normal, 0, -1, 0).endVertex();
-
-                    consumer = consumers.getBuffer(LINE_CUSTOM.apply(4.0, false));
-                    consumer.vertex(model, 0, 0, 0).color(1f, 1f, 1f, 1f).normal(normal, 0, -1, 0).endVertex();
-                    consumer.vertex(model, 0, -0.6f, 0).color(1f, 1f, 1f, 1f).normal(normal, 0, -1, 0).endVertex();
+                    //removed second pointer line since gui now has cursor
                 }
             }
 
@@ -364,43 +364,43 @@ public class VrFirstPersonRenderer {
             matrices.popPose();
         }
 
-        //TODO
-//        if (FGM.isScreenOpen() && FGM.position.distanceTo(JOMLUtil.convert(MCXRPlayClient.viewSpacePoses.getUnscaledPhysicalPose().pos)) > 1 || true) {
-//            matrices.pushPose();
-//
-//            transformToHand(matrices, 1 - MCXRPlayClient.getMainHand(), context.tickDelta());
-//
-//            matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(-90.0F));
-//            matrices.mulPose(com.mojang.math.Vector3f.YP.rotationDegrees(180.0F));
-//
-//            matrices.translate(-2 / 16f, -12 / 16f, 0);
-//
-//            matrices.pushPose();
-//            matrices.translate(2 / 16f, 12 / 16f, -1 / 16f);
-//            matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(-75f));
-//
-//            matrices.scale(-0.005f, -0.005f, -0.005f);
-////            renderGuiQuad(matrices.last(), consumers);
-////            consumers.endLastBatch();
-//
-//            var text = Component.literal("Click thumbstick to reset GUI");
-//            int i = "deadmau5".equals(text.getString()) ? -10 : 0;
-//            boolean bl = true;
-//
-//            Matrix4f matrix4f = matrices.last().pose();
-//            float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
-//            int j = (int)(g * 255.0F) << 24;
-//            Font font = Minecraft.getInstance().font;
-//            float h = (float)(-font.width(text) / 2);
-//            font.drawInBatch(text, h, (float)i, 553648127, false, matrix4f, consumers, bl, j, LightTexture.FULL_BRIGHT);
-//            if (bl) {
-//                font.drawInBatch(text, h, (float)i, -1, false, matrix4f, consumers, false, 0, LightTexture.FULL_BRIGHT);
-//            }
-//
-//            matrices.popPose();
-//
-//            matrices.popPose();
-//        }
+        //TODO - reset gui pos notification
+        if (FGM.isScreenOpen() && FGM.position.distanceTo(JOMLUtil.convert(MCXRPlayClient.viewSpacePoses.getUnscaledPhysicalPose().pos)) > 2) {
+            matrices.pushPose();
+
+            transformToHand(matrices, 1 - MCXRPlayClient.getMainHand(), context.tickDelta());
+
+            matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(-90.0F));
+            matrices.mulPose(com.mojang.math.Vector3f.YP.rotationDegrees(180.0F));
+
+            matrices.translate(-2 / 16f, -12 / 16f, 0);
+
+            matrices.pushPose();
+            matrices.translate(2 / 16f, 12 / 16f, -1 / 16f);
+            matrices.mulPose(com.mojang.math.Vector3f.XP.rotationDegrees(-75f));
+
+            matrices.scale(-0.005f, -0.005f, -0.005f);
+//            renderGuiQuad(matrices.last(), consumers);
+//            consumers.endLastBatch();
+
+            var text = Component.literal("Click thumbstick to reset GUI");
+            int i = "deadmau5".equals(text.getString()) ? -10 : 0;
+            boolean bl = true;
+
+            Matrix4f matrix4f = matrices.last().pose();
+            float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
+            int j = (int)(g * 255.0F) << 24;
+            Font font = Minecraft.getInstance().font;
+            float h = (float)(-font.width(text) / 2);
+            font.drawInBatch(text, h, (float)i, 553648127, false, matrix4f, consumers, bl, j, LightTexture.FULL_BRIGHT);
+            if (bl) {
+                font.drawInBatch(text, h, (float)i, -1, false, matrix4f, consumers, false, 0, LightTexture.FULL_BRIGHT);
+            }
+
+            matrices.popPose();
+
+            matrices.popPose();
+        }
 
         consumers.endBatch();
     }
@@ -529,80 +529,96 @@ public class VrFirstPersonRenderer {
                 continue;
             }
 
-            if (!FGM.isScreenOpen()) {
-                ItemStack stack = handIndex == 0 ? player.getOffhandItem() : player.getMainHandItem();
-                if (player.getMainArm() == HumanoidArm.LEFT) {
-                    stack = handIndex == 1 ? player.getOffhandItem() : player.getMainHandItem();
+            ItemStack stack = handIndex == 0 ? player.getOffhandItem() : player.getMainHandItem();
+            if (player.getMainArm() == HumanoidArm.LEFT) {
+                stack = handIndex == 1 ? player.getOffhandItem() : player.getMainHandItem();
+            }
+            if (FGM.isScreenOpen()) {//in menu hold picked item
+                if(handIndex == MCXRPlayClient.getMainHand()){
+                    //stack = player.containerMenu.getCarried();//breaks with enchanted items
+                    //stack = ItemStack.of(player.inventoryMenu.getCarried().getOrCreateTag());
+                    //stack = new ItemStack(player.containerMenu.getCarried().getItem());//still breaks on enchanted book and potions buggy
+                    if(!player.inventoryMenu.getCarried().isEnchanted() && !player.inventoryMenu.getCarried().hasFoil()) {
+                        stack = player.inventoryMenu.getCarried();
+                    }else{stack =ItemStack.EMPTY;}
+                } else {stack =ItemStack.EMPTY;}
+            }
+
+            if (stack!=null && !stack.isEmpty()) {
+                matrices.pushPose();
+                transformToHand(matrices, handIndex, deltaTick);
+
+                if (handIndex == MCXRPlayClient.getMainHand()) {
+                    float swing = -0.6f * Mth.sin((float) (Math.sqrt(player.getAttackAnim(deltaTick)) * Math.PI * 2));
+                    matrices.mulPose(com.mojang.math.Vector3f.XP.rotation(swing));
                 }
 
-                if (!stack.isEmpty()) {
-                    matrices.pushPose();
-                    transformToHand(matrices, handIndex, deltaTick);
-
-                    if (handIndex == MCXRPlayClient.getMainHand()) {
-                        float swing = -0.6f * Mth.sin((float) (Math.sqrt(player.getAttackAnim(deltaTick)) * Math.PI * 2));
-                        matrices.mulPose(com.mojang.math.Vector3f.XP.rotation(swing));
-                    }
-
-                    if (stack.getItem() == Items.CROSSBOW) {
-                        float f = handIndex == 0 ? -1 : 1;
-                        matrices.translate(f * -1.5 / 16f, 0, 0);
-                        matrices.mulPose(Quaternion.fromXYZ(0, f * Math.toRadians(15), 0));
-                    }
-
-                    if (stack.getItem() == Items.TRIDENT && player.getUseItem() == stack) {
-                        float k = (float) stack.getUseDuration() - ((float) player.getUseItemRemainingTicks() - deltaTick + 1);
-                        float l = Math.min(k / 10, 1);
-                        if (l > 0.1F) {
-                            float m = Mth.sin((k - 0.1f) * 1.3f);
-                            float n = l - 0.1f;
-                            float o = m * n;
-                            matrices.translate(0, o * 0.004, 0);
-                        }
-                        matrices.translate(0, 0, l * 0.2);
-                        matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(90), 0, 0));
-                    }
-
-                    if (stack.getItem() == Items.FILLED_MAP) {
-                        MapRenderer.renderFirstPersonMap(matrices, consumers, light, stack, false, handIndex== 0);
-                    }
-                    else {
-                        matrices.scale(1.5f,1.5f,1.5f);
-                        //held item animations
-                        InteractionHand curHand= handIndex == 0 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-                        if(player.getUsedItemHand()==curHand && player.getUseItemRemainingTicks() > 0 && player.isUsingItem()) {
-                            switch (stack.getUseAnimation()) {
-                                case EAT:
-                                case DRINK:
-                                    float f = (float)player.getUseItemRemainingTicks() - deltaTick + 1.0F;
-                                    float g = f / (float)stack.getUseDuration();
-                                    if (g < 0.8F) {
-                                        float h = Mth.abs(Mth.cos(f / 4.0F * 3.1415927F) * -0.07F);
-                                        matrices.translate(0.0, (double)h, 0.0);
-                                    }
-                                    matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(20), 0, 0));
-                                    break;
-                                case BLOCK: //hacky shield pose fix
-                                    matrices.translate((2 * handIndex - 1) * -0.2 - 0.0465, 0.06 * (1 - handIndex), 0);
-                                    matrices.mulPose(Quaternion.fromXYZ(0, 0, Math.toRadians((2 * handIndex - 1) * -3)));
-                                    matrices.mulPose(Quaternion.fromXYZ(0, Math.toRadians((2 * handIndex - 1) * 45), 0));
-                                    matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(-50), 0, 0));
-                            }
-                        }
-
-                        Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer().renderItem(
-                                player,
-                                stack,
-                                handIndex == 0 ? THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND,
-                                handIndex == 0,
-                                matrices,
-                                consumers,
-                                light
-                        );
-                    }
-
-                    matrices.popPose();
+                if (stack.getItem() == Items.CROSSBOW) {
+                    float f = handIndex == 0 ? -1 : 1;
+                    matrices.translate(f * -1.5 / 16f, 0, 0);
+                    matrices.mulPose(Quaternion.fromXYZ(0, f * Math.toRadians(15), 0));
                 }
+
+                if (stack.getItem() == Items.TRIDENT && player.getUseItem() == stack) {
+                    float k = (float) stack.getUseDuration() - ((float) player.getUseItemRemainingTicks() - deltaTick + 1);
+                    float l = Math.min(k / 10, 1);
+                    if (l > 0.1F) {
+                        float m = Mth.sin((k - 0.1f) * 1.3f);
+                        float n = l - 0.1f;
+                        float o = m * n;
+                        matrices.translate(0, o * 0.004, 0);
+                    }
+                    matrices.translate(0, 0, l * 0.2);
+                    matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(90), 0, 0));
+                }
+
+                if (stack.getItem() == Items.FILLED_MAP) {
+                    MapRenderer.renderFirstPersonMap(matrices, consumers, light, stack, false, handIndex== 0);
+                }
+                else {
+                    //item tilted forward in menu or for tool using motion controls
+                    if ((FGM.isScreenOpen() || (XrInput.extendReach>0 && PlayOptions.immersiveControls)) && handIndex == MCXRPlayClient.getMainHand()){
+                        float tiltAngle=-80;
+                        matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(tiltAngle), 0, 0));
+                        matrices.translate(0, 0, -0.25);
+                    }
+                    if ((XrInput.eatDelay==0 && !FGM.isScreenOpen()) || handIndex != MCXRPlayClient.getMainHand()){//room scale items if not eating/in inventory
+                        matrices.scale(1.5f, 1.5f, 1.5f);
+                    }
+
+                    //other held item animations
+                    InteractionHand curHand= handIndex == 0 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+                    if(player.getUsedItemHand()==curHand && player.getUseItemRemainingTicks() > 0 && player.isUsingItem()) {
+                        switch (stack.getUseAnimation()) {
+                            case EAT:
+                            case DRINK:
+                                float f = (float)player.getUseItemRemainingTicks() - deltaTick + 1.0F;
+                                float g = f / (float)stack.getUseDuration();
+                                if (g < 0.8F) {
+                                    float h = Mth.abs(Mth.cos(f / 4.0F * 3.1415927F) * -0.07F);
+                                    matrices.translate(0.0, (double)h, 0.0);
+                                }
+                                matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(20), 0, 0));
+                                break;
+                            case BLOCK: //hacky shield pose fix
+                                matrices.translate((2 * handIndex - 1) * -0.2 - 0.0465, 0.06 * (1 - handIndex), 0);
+                                matrices.mulPose(Quaternion.fromXYZ(0, 0, Math.toRadians((2 * handIndex - 1) * -3)));
+                                matrices.mulPose(Quaternion.fromXYZ(0, Math.toRadians((2 * handIndex - 1) * 45), 0));
+                                matrices.mulPose(Quaternion.fromXYZ(Math.toRadians(-50), 0, 0));
+                        }
+                    }
+
+                    Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer().renderItem(
+                            player,
+                            stack,
+                            handIndex == 0 ? THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND,
+                            handIndex == 0,
+                            matrices,
+                            consumers,
+                            light
+                    );
+                }
+                matrices.popPose();
             }
 
             //Draw hand

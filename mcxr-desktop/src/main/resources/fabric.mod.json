@@ -5,7 +5,8 @@
   "name": "[MCXR] Desktop",
   "description": "VR!",
   "authors": [
-    "Sorenon"
+    "Sorenon",
+    "Xanion"
   ],
   "contact": {
     "homepage": "https://github.com/Sorenon/MCXR",
@@ -16,7 +17,8 @@
     "modmenu": {
       "links": {
         "modmenu.discord": "https://discord.gg/CqEZbJwWx4"
-      }
+      },
+      "parent": "mcxr-play"
     }
   },
   "license": "MIT",

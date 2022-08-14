@@ -10,16 +10,15 @@
   "mcxr.move_direction.head" : "Head",
   "mcxr.move_direction.right_hand" : "Right Hand",
   "mcxr.move_direction.left_hand" : "Left Hand",
-  "mcxr.options.enable_snap_turning": "Enable Snap Turn",
-  "mcxr.options.enable_smooth_turning": "Enable Smooth Turn",
-  "mcxr.options.lock_playerheight" : "Lock Player Height",
-  "mcxr.options.unlock_playerheight" : "Unlock Player Height",
-  "mcxr.options.index_touchpad": "Index Touchpad: %s",
-  "mcxr.options_disable_immersive_controls": "Disable Immersive Controls",
-  "mcxr.options_enable_immersive_controls": "Enable Immersive Controls",
-  "mcxr.index_touchpad.off": "Off",
-  "mcxr.index_touchpad.right_hand": "Right",
-  "mcxr.index_touchpad.left_hand": "Left",
+
+  "mcxr.options.smooth_turning": "Camera Turning: Smooth",
+  "mcxr.options.snap_turning": "Camera Turning: Snap",
+  "mcxr.options.teleportEnabled": "Teleporting: Enabled",
+  "mcxr.options.teleportDisabled": "Teleporting: Disabled",
+  "mcxr.options.immersive_on": "Immersive Controls: Enabled",
+  "mcxr.options.immersive_off": "Immersive Controls: Disabled",
+  "mcxr.options.height_real" : "Player Height: Real",
+  "mcxr.options.height_vanilla" : "Player Height: Vanilla",
 
   "mcxr.menu.reload": "Reload Headset",
   "mcxr.menu.session_not_created": "No headset found:",
@@ -41,6 +40,10 @@
   "mcxr.action.sprint": "Sprint",
   "mcxr.action.reset_pos": "Reset Pos",
 
+  "mcxr.action.sneakAnalog": "Sneak Analog",
+  "mcxr.action.sprintAnalog": "Sprint Analog",
+  "mcxr.action.swapHands": "Swap Hands",
+
   "mcxr.actionset.gui": "GUI",
   "mcxr.action.close": "Close",
   "mcxr.action.pickup": "Pickup / Drop",
@@ -52,5 +55,5 @@
   "mcxr.action.aim": "Aim Pose",
   "mcxr.action.grip": "Grip Pose",
 
-  "mcxr.quickmenu": "QuickMenu"
+  "mcxr.quick_menu": "Quick Menu"
 }
