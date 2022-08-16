@@ -383,8 +383,8 @@ public class VrFirstPersonRenderer {
 //            renderGuiQuad(matrices.last(), consumers);
 //            consumers.endLastBatch();
 
-            var text = Component.literal("Click thumbstick to reset GUI");
-            int i = "deadmau5".equals(text.getString()) ? -10 : 0;
+            String text = "Click thumbstick to reset GUI";
+            int i = "deadmau5".equals(text) ? -10 : 0;
             boolean bl = true;
 
             Matrix4f matrix4f = matrices.last().pose();
@@ -608,7 +608,7 @@ public class VrFirstPersonRenderer {
                         }
                     }
 
-                    Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer().renderItem(
+                    Minecraft.getInstance().getItemInHandRenderer().renderItem(
                             player,
                             stack,
                             handIndex == 0 ? THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND,
