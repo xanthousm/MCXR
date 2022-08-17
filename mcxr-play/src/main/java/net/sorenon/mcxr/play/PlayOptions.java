@@ -23,6 +23,8 @@ public class PlayOptions {
     public static boolean snapTurnSound = true;
     public static float SnapTurnDelay = 0.25f;
     public static boolean immersiveControls = true;
+    public static float immersiveAttackMinSpeed = 2.5f;
+    public static boolean immersiveUI = true;
     public static boolean fullMirror = false;
     public static boolean teleportEnabled=true;
     /**
@@ -56,6 +58,8 @@ public class PlayOptions {
         fileConfig.set("snapTurnSound", snapTurnSound);
         fileConfig.set("SnapTurnDelay", SnapTurnDelay);
         fileConfig.set("immersiveControls", immersiveControls);
+        fileConfig.set("immersiveAttackMinSpeed", immersiveAttackMinSpeed);
+        fileConfig.set("immersiveUI", immersiveUI);
         fileConfig.set("fullMirror",fullMirror);
 
         fileConfig.set("teleportEnabled", teleportEnabled);
@@ -84,6 +88,8 @@ public class PlayOptions {
         snapTurnSound=fileConfig.getOrElse("snapTurnSound",true);
         SnapTurnDelay=fileConfig.<Number>getOrElse("SnapTurnDelay",0.25f).floatValue();
         immersiveControls=fileConfig.getOrElse("immersiveControls",true);
+        immersiveAttackMinSpeed=fileConfig.<Number>getOrElse("immersiveAttackMinSpeed", 2.5f).floatValue();
+        immersiveUI=fileConfig.getOrElse("immersiveUI",true);
         fullMirror=fileConfig.getOrElse("fullMirror",false);
 
         teleportEnabled = fileConfig.getOrElse("teleportEnabled", true);
