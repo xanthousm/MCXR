@@ -5,7 +5,7 @@ import com.mojang.math.Quaternion;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
@@ -68,9 +68,7 @@ public final class XrInput {
     public static int eatDelay = 0;
     public static int attackDelay = 0;
 
-    private static float minHitVelo = 2.5f;
     private static int motionPoints = 0;
-    private static int minMotionPoints = 8;
     public static int maxMotionPoints = 16;
     public static float extendReach = 0.0f;
     public static HitResult lastHit = null;
@@ -173,6 +171,12 @@ public final class XrInput {
             }
         }
 
+        if (actionSet.stand.changedSinceLastSync) {
+            if (actionSet.stand.currentState) {
+                MCXRPlayClient.heightAdjustStand = !MCXRPlayClient.heightAdjustStand;
+            }
+        }
+
         if (PlayOptions.teleportEnabled && actionSet.teleport.changedSinceLastSync && !actionSet.teleport.currentState) {
             XrInput.teleport = true;
         }
@@ -223,21 +227,21 @@ public final class XrInput {
                 }
 
                 if (lastHit == null || (oldDist-0.1)>newDist) {//new target or closer target
-                    if(velo>minHitVelo) {
+                    if(velo>PlayOptions.immersiveAttackMinSpeed) {
                         if (hitResult.getType() == HitResult.Type.ENTITY && curDist<minDist+1.0) {//make hit distance for entities more practical
                             attackDelay = 5;
                             lastHit = hitResult;//some reason newHit doesn't work for entities.
                         }
                         else if (hitResult.getType() == HitResult.Type.BLOCK && newDist<minDist) {
                             if(lastHit == null || (lastHit != null && lastHit.getType() == HitResult.Type.BLOCK)) {
-                                attackDelay = motionPoints;
+                                attackDelay = motionPoints+2;
                                 lastHit = newHit;
                             }
                         }
                     }
                 }
                 else if (lastHit.getType() == HitResult.Type.BLOCK){//continue on current target or let go, with larger leeway to continue swings
-                    if (hitResult.getType() == HitResult.Type.ENTITY && velo>minHitVelo) {//prioritise entites in range, doesnt work since newHit doesn't like entities
+                    if (hitResult.getType() == HitResult.Type.ENTITY && velo>PlayOptions.immersiveAttackMinSpeed) {//prioritise entites in range, doesnt work since newHit doesn't like entities
                         lastHit = newHit;
                         attackDelay = 5;
                     }
@@ -251,14 +255,18 @@ public final class XrInput {
             //decay attackDelay without conditions
             if (attackDelay > 0) {
                 attackDelay -= 1;
-                mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
                 if(attackDelay>maxMotionPoints)attackDelay=maxMotionPoints;
+            }
+            else{
+                lastHit = null;
+            }
+            if(attackDelay > 2){//stop pressing before unlocking crosshair
+                mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_PRESS, 0);
             }
             else {
                 if (!actionSet.attack.currentState) {//only if not pressing attack
                     mouseHandler.callOnPress(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_RELEASE, 0);
                 }
-                lastHit = null;
             }
 
             //==item eating==
