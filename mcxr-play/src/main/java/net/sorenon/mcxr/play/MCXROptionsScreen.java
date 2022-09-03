@@ -79,33 +79,33 @@ public class MCXROptionsScreen extends Screen {
                 this.height / 6 + 54 + 12,
                 150,
                 20,
-                new TranslatableComponent("mcxr.options.walk_direction"),
+                new TranslatableComponent("mcxr.options.walk_direction", PlayOptions.walkDirection.toComponent()),
                 button -> {
                     PlayOptions.walkDirection = PlayOptions.walkDirection.iterate();
                     PlayOptions.save();
-                    button.setMessage(new TranslatableComponent("mcxr.options.walk_direction"));
+                    button.setMessage(new TranslatableComponent("mcxr.options.walk_direction", PlayOptions.walkDirection.toComponent()));
                 }));
         this.addRenderableWidget(new Button(
                 this.width / 2 - 155,
                 this.height / 6 + 54 + 24 + 12,
                 150,
                 20,
-                new TranslatableComponent("mcxr.options.swim_direction"),
+                new TranslatableComponent("mcxr.options.swim_direction", PlayOptions.swimDirection.toComponent()),
                 button -> {
                     PlayOptions.swimDirection = PlayOptions.swimDirection.iterate();
                     PlayOptions.save();
-                    button.setMessage(new TranslatableComponent("mcxr.options.swim_direction"));
+                    button.setMessage(new TranslatableComponent("mcxr.options.swim_direction", PlayOptions.swimDirection.toComponent()));
                 }));
         this.addRenderableWidget(new Button(
                 this.width / 2 - 155,
                 this.height / 6 + 54 + 24 * 2 + 12,
                 150,
                 20,
-                new TranslatableComponent("mcxr.options.fly_direction"),
+                new TranslatableComponent("mcxr.options.fly_direction", PlayOptions.flyDirection.toComponent()),
                 button -> {
                     PlayOptions.flyDirection = PlayOptions.flyDirection.iterate();
                     PlayOptions.save();
-                    button.setMessage(new TranslatableComponent("mcxr.options.fly_direction"));
+                    button.setMessage(new TranslatableComponent("mcxr.options.fly_direction", PlayOptions.flyDirection.toComponent()));
                 }));
 
         this.addRenderableWidget(new Button(
