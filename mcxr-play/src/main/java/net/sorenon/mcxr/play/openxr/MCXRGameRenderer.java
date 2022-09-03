@@ -439,9 +439,7 @@ public class MCXRGameRenderer {
             if (MCXRPlayClient.heightAdjustStand) {
                 MCXRPlayClient.xrOrigin.y += MCXRPlayClient.heightAdjust;
             }
-
-            //sneaking camera shift
-            if (camEntity.isShiftKeyDown()) {
+            else if (camEntity.isShiftKeyDown()) { //sneaking camera shift (only if using real height)
                 MCXRPlayClient.xrOrigin.y -= 0.25;
             }
 
