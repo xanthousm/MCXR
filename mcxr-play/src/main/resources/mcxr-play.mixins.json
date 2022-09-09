@@ -23,6 +23,7 @@
     "gui.MinecraftMixin",
     "gui.ScreenMixin",
     "hands.FireworkRocketEntityMixin",
+    "hands.FishingHookRendererMixin",
     "hands.GameRendererMixin",
     "hands.LivingEntityMixin",
     "hands.PlayerMixin",
