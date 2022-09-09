@@ -28,7 +28,8 @@
     ]
   },
   "mixins": [
-    "mcxr-play.mixins.json"
+    "mcxr-play.mixins.json",
+    "vivecraft.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.6",

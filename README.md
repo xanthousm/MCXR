@@ -1,59 +1,61 @@
-![](https://user-images.githubusercontent.com/90802279/172026916-a617134b-a829-4d67-b8ec-ef10ea4be266.png)
-![](https://img.shields.io/github/v/release/Sorenon/MCXR) ![](https://img.shields.io/discord/829825443480993802?label=discord) ![](https://img.shields.io/modrinth/dt/hcEWWGik?label=mcxr-core%20downloads) ![](https://img.shields.io/modrinth/dt/9jVyqpHR?label=mcxr-play%20downloads) ![](https://img.shields.io/reddit/subreddit-subscribers/MinecraftXR)
-<br/>A virtual reality / augmented reality mod for Minecraft using OpenXR and Fabric.
+This fork of MCXR contains tweaks to the mod that I just couldn't wait for - so I did them myself.
+The original MCXR mod can be found [here](https://github.com/mcxr-org/MCXR).
+## *Control Mappings*
+I am testing my builds on a Quest 2 using virtual desktop to link to Windows 10, so the controller mappings for other VR device controllers might need improvement. The current controller mappings are as follows:
+### Oculus/Vive Cosmos/HP Reverb G2
+|Action|Left|Right|
+|---|---|---|
+|…/input/a/click||jump|
+|…/input/b/click||quick menu/chat|
+|…/input/x/click|teleport||
+|…/input/y/click|inventory/menu(hold)||
+|…/input/menu/click|menu||
+|…/input/squeeze/value|hotbar|hotbar|
+|…/input/trigger/value|use|attack|
+|…/input/thumbstick/x|move|turn|
+|…/input/thumbstick/y|move|sprint/sneak|
+|…/input/thumbstick/click|swap off-hand|reset pos+change height|
 
-**MCXR Links (TODO add QuestCraft links)**
-- [Discord](https://discord.gg/a7PPU9tYDU) for troubleshooting or talking about the mod
-- Support Development by donating to my [Ko-Fi page](https://ko-fi.com/sorenon)
-- Download MCXR from [Modrinth](https://modrinth.com/user/Sorenon) or [Curseforge](https://www.curseforge.com/members/sorenon/projects)
-- [Reddit](https://www.reddit.com/r/MinecraftXR)
+### Index
+|Action|Left|Right|
+|---|---|---|
+|…/input/a/click||jump|
+|…/input/b/click|inventory/menu(hold)||
+|…/input/squeeze/value|hotbar|hotbar|
+|…/input/trigger/value|use|attack|
+|…/input/thumbstick/x|move|turn|
+|…/input/thumbstick/y|move|sprint/sneak|
+|…/input/thumbstick/click|swap off-hand|reset pos+change height|
+|…/input/trackpad/x|||
+|…/input/trackpad/y|||
+|…/input/trackpad/force|teleport|quickmenu/chat|
 
-**Information**
-- [VR Installation](#installation-for-vr-players)
-- [Non-VR and Server Installation](#installation-for-non-vr-players-and-servers)
-- [Comparing Competition](#comparisons-to-competitors)
+### Vive Wands
+|Action|Left|Right|
+|---|---|---|
+|…/input/squeeze/click|hotbar|hotbar|
+|…/input/menu/click|teleport|quickmenu/chat|
+|…/input/trigger/value|use|attack|
+|…/input/trackpad/x|move|turn|
+|…/input/trackpad/y|move|sprint/sneak|
+|…/input/trackpad/click|inventory/menu(hold)|jump|
 
----------
-### Installation for VR Players
-Download the latest version of [MCXR Core](https://modrinth.com/mod/mcxr-core) & [MCXR Play](https://modrinth.com/mod/mcxr-play). Then, install the mods by placing them into the /mods folder.
-<br/>
-For an in game title screen also install and set up a compatible version of https://github.com/Sorenon/TitleWorlds
-## For Servers and Non-VR Players
-MCXR is compatible with Vanilla servers and players but for the full experience install MCXR Core from https://modrinth.com/mod/mcxr-core
+### WMR
+|Action|Left|Right|
+|---|---|---|
+|…/input/menu/click|teleport|quickmenu/chat|
+|…/input/squeeze/click|hotbar|hotbar|
+|…/input/trigger/value|use|attack|
+|…/input/thumbstick/x|move|turn|
+|…/input/thumbstick/y|move|sprint/sneak|
+|…/input/thumbstick/click|swap off-hand|reset pos+change height|
+|…/input/trackpad/x|||
+|…/input/trackpad/y|||
+|…/input/trackpad/click|inventory/menu(hold)|jump|
 
-# *Known Issues*
-Vive Pro controllers are not yet supported <br/>
-No way to rebind controls without SteamVR</br>
-SteamVR on Linux crashes due to poor OpenXR implementation, this can be mitigated with an [OpenXR Layer](https://github.com/Sorenon/sorenon_openxr_layer)
+## Licences
+LICENCE-tr7zw: net.tr7zw.MapRenderer (Based on [Not Enough Animations](https://github.com/tr7zw/NotEnoughAnimations)).
 
-### Installation for Non-VR Players and Servers
-Download the latest version of [MCXR Core](https://modrinth.com/mod/mcxr-core). Then, install the mod by placing it into the /mods folder.
+LICENCE-VivecraftMod: net.vivecraft.MobRendererMixin (Based on [VivecraftMod](https://github.com/ferriarnus/VivecraftMod)).
 
-### *Comparisons to Competitors*
-> ✅ *YES*
-> <br/>⛔ *NO*
-> <br/>🚧 *IN DEVELOPMENT*
-
-| Comparisons                 | [Bedrock VR](https://www.minecraft.net/en-us/vr)| [Vivecraft](http://www.vivecraft.org/)| [Minecraft XR](https://github.com/Sorenon/MCXR) |
-| --------------------------- | ------------------------------- | ----------------------------- | ---------------------------- |
-| State                       | Released                        | Released                      | Beta                         |
-| Release Year                | 2016                            | 2013 / 2016                   | 2021 (Beta)                  |
-| Platform                    | Bedrock                         | Java                          | Java                         |
-| Mod Support                 | Bedrock Add-Ons                 | Forge                         | Fabric, Quilt                |
-| Performance                 | 🥇                              | 🥉                           | 🥈 (with Sodium)             |
-| Supported Devices           | 🟡 Oculus and WMR Headsets      | ✅ OpenVR-supported Devices   | ✅ OpenXR-supported Devices |
-| Shaders Support             | ⛔                              | ✅ Optifine                   | ✅ Iris                     |
-| Vanilla Server Compatibility| ✅                              | ✅                           | ✅                           |
-| VR Addon Support            | ⛔                              | 🚧                           | 🚧                           |
-| 3rd party Mod Intergration  | ⛔                              | ⛔                           | 🚧                           |
-| Immersive UI                | ⛔                              | ⛔                           | 🚧                           |
-| Immersive Controls          | ⛔                              | ✅                           | 🚧                           |
-| Open Source                 | ⛔                              | ✅                           | ✅                           |
-| Versions                    | Latest                          | 1.7.10, 1.10 to 1.18 with paid only 1.19 access | 1.18, 1.19                         |
-| Standalone Quest Support    | ⛔                              | ⛔                           | ✅ [Questcraft](https://sidequestvr.com/app/7150/questcraft)|
-| VR Playermodels             | ⛔                              | ✅                           | 🚧                           |
-| Spigot Plugin Support       | ⛔                              | ✅                           | ⛔                           |
-| Mod Method                  | Built-in                        | Jar mod                       | Mixins                       |
-| Sponsored by Facebook       | Yes                              | No                           | No                           |
-| Linux Support               | ⛔                              | ✅                           | ✅                           |
-| Mac Support                 | ⛔                              | ⛔                           | ⛔                           |
+LICENCE: All other files (Based on [MCXR](https://github.com/mcxr-org/MCXR)).
