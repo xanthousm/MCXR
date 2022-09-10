@@ -38,9 +38,13 @@ public class HumanoidModelMixin<T extends LivingEntity> extends AgeableListModel
         if(livingEntity instanceof Player player) {
             PlayerExt acc = (PlayerExt) player;
             if(acc.isXR()) {
+                Pose headP = acc.getHeadPose();
                 if (acc.getLeftHandPose() != null) {
-                    Pose leftArm = acc.getLeftHandPose();
+                    //Pose leftArmP = acc.getLeftHandPose();
+                    //Vector3f relPos = leftArmP.pos.sub(headP.pos);
+                    //this.leftArm.setPos(relPos.x,relPos.y,relPos.z);
 
+                    /*
                     Vector3f vec3 = new Vector3f();
                     Quaternionf quat = new Quaternionf(leftArm.orientation);
                     quat.rotateY(Math.toRadians(180));
@@ -51,10 +55,17 @@ public class HumanoidModelMixin<T extends LivingEntity> extends AgeableListModel
                             vec3.y,
                             vec3.z
                     );
+
+                     */
                 }
 
                 if (acc.getRightHandPose() != null) {
-                    Pose rightArm = acc.getRightHandPose();
+                    Pose rightArmP = acc.getRightHandPose();
+                    //Vector3f relPos = rightArmP.pos;
+                    //relPos.sub(headP.pos);
+                    //this.rightArm.setPos(relPos.x,relPos.y,relPos.z);
+
+                    /*
                     Vector3f vec3 = new Vector3f();
                     Quaternionf quat = new Quaternionf(rightArm.orientation);
                     quat.rotateY(Math.toRadians(180));
@@ -65,6 +76,8 @@ public class HumanoidModelMixin<T extends LivingEntity> extends AgeableListModel
                             vec3.y,
                             vec3.z
                     );
+
+                     */
                 }
             }
         }
