@@ -48,7 +48,7 @@ public class XrEditBoxScreen extends Screen {
     @Override
     protected void init() {
 
-        if (!PlayOptions.xrUninitialized)
+        if (!PlayOptions.xrUninitialized && !PlayOptions.xrPaused)
             keyboard.renderKeyboard(keyboard.getDefaultCharset(), this.width, this.height, 30);
 
         super.init();

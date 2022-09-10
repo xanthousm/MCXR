@@ -18,7 +18,7 @@ public abstract class EditBoxMixin {
     public void mouseClickedMixin(EditBox instance, int cursor) {
         assert Minecraft.getInstance().screen != null;
 
-        if (Minecraft.getInstance().screen.getClass() == ChatScreen.class || PlayOptions.xrUninitialized || Minecraft.getInstance().screen.getClass() == XrSignEditScreen.class) {
+        if (Minecraft.getInstance().screen.getClass() == ChatScreen.class || PlayOptions.xrPaused ||PlayOptions.xrUninitialized || Minecraft.getInstance().screen.getClass() == XrSignEditScreen.class) {
             instance.setCursorPosition(cursor);
             return;
         }

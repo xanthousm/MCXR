@@ -30,7 +30,7 @@ public abstract class MultiPlayerScreenMixin extends Screen {
 
     @Redirect(method = "init", at=@At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 2))
     public GuiEventListener addrenderableMixin(JoinMultiplayerScreen instance, GuiEventListener guiEventListener) {
-        if (!PlayOptions.xrUninitialized) {
+        if (!PlayOptions.xrUninitialized && !PlayOptions.xrPaused) {
             if (FabricLoader.getInstance().isModLoaded("titleworlds")) {
                 return addRenderableWidget(new Button(this.width / 2 + 54, this.height - 52, 100, 20, Component.translatable("selectServer.add"), (button) -> {
                     this.minecraft.setScreen(new AddServerScreen(Component.translatable("Add server"), instance));

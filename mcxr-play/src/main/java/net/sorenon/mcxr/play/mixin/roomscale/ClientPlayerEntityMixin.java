@@ -112,7 +112,7 @@ public abstract class ClientPlayerEntityMixin extends Player {
 
     @Redirect(method="openTextEdit", at=@At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
     public void openSignScreen(Minecraft instance, Screen screen, SignBlockEntity sign) {
-        if (!PlayOptions.xrUninitialized)
+        if (!PlayOptions.xrUninitialized && !PlayOptions.xrPaused)
             instance.setScreen(new XrSignEditScreen(Component.translatable("Sign"), sign));
         else
             instance.setScreen(new SignEditScreen(sign, instance.isTextFilteringEnabled()));

@@ -28,7 +28,7 @@ public class XrChatScreen extends ChatScreen {
 
         super.init();
         
-        if (!PlayOptions.xrUninitialized)
+        if (!PlayOptions.xrUninitialized && !PlayOptions.xrPaused)
             _keyboard = new XrChatKeyboard(this.input, this, 30);
             _keyboard.renderKeyboard(_keyboard.getDefaultCharset(), this.width, this.height, 30);
 
